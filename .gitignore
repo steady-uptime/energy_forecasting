@@ -1,0 +1,74 @@
+# --- Virtual Environments ---
+.venv/
+env/
+venv/
+ENV/
+
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- OS & System Files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Secrets & Environment Variables ---
+.env
+*.secret
+*.key
+
+# --- Data Assets ---
+# Policy: Ignore all content within the data directory.
+# Exception: Preserve the directory structure (Schema) using .gitkeep.
+data/*
+!data/.gitkeep
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/interim/.gitkeep
+
+# --- Runtime Logs ---
+# Ignore all log files but preserve the logs directory structure.
+logs/*
+!logs/.gitkeep
+
+# --- Model Artifacts ---
+# Ignore all content within the artifacts directory.
+# Exception: Preserve the sub-directory structure (Schema) using .gitkeep.
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/metadata/.gitkeep
+!artifacts/models/.gitkeep
+!artifacts/reports/.gitkeep
+
+# Global exclusion for common heavy serialized model formats 
+# (Double-layered safety)
+*.joblib
+*.pkl
+*.h5
+*.pth
+
+# --- Notebooks ---
+# Keep the notebooks directory for exploration, but ignore the content.
+notebooks/*
+!notebooks/.gitkeep
+
+# --- IDE & Editor Specifics ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.history/
+
+# --- Build & Distribution ---
+build/
+dist/
+*.egg-info/
+
+# --- Testing & Static Analysis ---
+.pytest_cache/
+.tox/
+.coverage
+.mypy_cache/
+.ruff_cache/

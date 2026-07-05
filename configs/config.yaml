@@ -1,0 +1,44 @@
+# configs/config.yaml
+# PROJECT METADATA
+# ---------------------------------------------------------
+# TODO: Update project_name and version for your specific use case.
+project_name: "Modular AutoML Energy Forecasting System"
+version: "1.0.0"
+
+
+# ENVIRONMENT & RESOURCE ALLOCATION
+# ---------------------------------------------------------
+# Defines the compute environment. Use env_mapping to override these 
+# values via environment variables in production (e.g., K8s ConfigMaps).
+env:
+  mode: "dev" # Options: dev, staging, prod
+  compute:
+    num_workers: 4
+    gpu_id: 0
+    memory_limit_gb: 16
+
+
+# ENVIRONMENT VARIABLE MAPPING
+# ---------------------------------------------------------
+# This maps OS Environment Variables to the internal configuration keys.
+# This follows the "Single Source of Truth" principle.
+env_mapping:
+  DATA_PATH: ["paths", "raw_data"]
+  ARTIFACT_PATH: ["paths", "artifacts"] # Updated to align with Artifact Root
+  LOG_LEVEL: ["logging", "level"]
+  BATCH_SIZE: ["training", "batch_size"]
+  LEARNING_RATE: ["training", "learning_rate"]
+  ENV_MODE: ["env", "mode"]
+
+
+# INFRASTRUCTURE LAYER (Pathing Contract)
+# ---------------------------------------------------------
+# Use pathlib to resolve these paths dynamically. 
+# DO NOT use absolute paths.
+# Gatekeeper Ready: A clear paths section that data_repository.py 
+# and model_store.py can use to "discover" where to read and write data.
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"
+  interim_data: "data/interim"
+  logs: "logs"

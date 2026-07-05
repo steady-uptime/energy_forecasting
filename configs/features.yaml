@@ -1,0 +1,22 @@
+# configs/features.yaml
+# FEATURE ENGINEERING
+# ---------------------------------------------------------
+# This section describes how features are created/built
+# which engineered features to create
+# how to compute them
+# which feature columns to aggregate
+# which range‑based features to extract
+# any domain‑specific feature rules
+
+# -----------------------------
+# TARGET & FEATURES
+# -----------------------------
+features:
+    total_load:
+      method: "sum"
+      pattern: "^MT_\\d{3}$"
+    
+    time_features:
+      hour_of_day: true
+      day_of_week: true
+      is_weekend: true

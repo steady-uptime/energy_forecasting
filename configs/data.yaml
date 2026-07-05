@@ -1,0 +1,104 @@
+# configs/data.yaml
+# DATA ENGINEERING LAYER (Logic & Schema)
+# ---------------------------------------------------------
+
+# This section defines the contract between the Data Loader and the Preprocessor.
+# Target columns
+# Feature column patterns
+# Split configs
+# Preprocessing rules (Imputation, Encoding)
+# Schema Validation (The gatekeeper contract)
+
+data:
+  # -----------------------------
+  # INGESTION CONFIG
+  # -----------------------------
+  csv_separator: ";"
+  timestamp_precision: "ns"
+
+  raw_columns:
+    timestamp: "Unnamed: 0"
+
+  # -----------------------------
+  # TARGET & FEATURES
+  # -----------------------------
+  target_column: "total_load"
+
+  # Automatically detect all MT_XXX columns
+  feature_column_pattern: "^MT_\\d{3}$"
+
+  # Engineered time features
+  time_features:
+    - hour_of_day
+    - day_of_week
+    - is_weekend
+
+  # -----------------------------
+  # TIME-SERIES SPLIT CONFIG
+  # -----------------------------
+  split_config:
+    method: "time_series"
+    train_end: "2013-12-31"
+    val_end: "2014-06-30"
+    test_end: "2014-12-31"
+
+  # -----------------------------
+  # PREPROCESSING RULES
+  # -----------------------------
+  preprocessing:
+
+    # Convert raw kW → kWh (15-minute intervals)
+    frequency_conversion:
+      enabled: true
+      factor: 0.25
+
+    # DST handling (your dataset has no anomalies, but logic stays)
+    dst_strategy: "interpolate"
+
+    # Convert MT_* columns to numeric
+    convert_to_numeric: true
+
+    # Missing value handling
+    imputation:
+      strategy: "forward_fill"
+
+    # Scaling
+    scaling:
+      method: "standard"
+
+  # -----------------------------
+  # SCHEMA VALIDATION (The Gatekeeper Contracts)
+  # -----------------------------
+  # These represent the "State" of the data after each service finishes its job.
+
+  # Contract 1: The Raw State (Exactly as read from CSV)
+  raw_schema:
+    - column: "timestamp"
+      type: "datetime64[ns]"
+    - column_pattern: "^MT_\\d{3}$"
+      type: "object"  # Raw CSV columns often read as objects before numeric conversion
+
+  # Contract 2: The Sanitized State (Post-Preprocessing)
+  # All MT_* columns are now numeric; timestamp is preserved for the next step.
+  preprocessed_schema:
+    - column: "timestamp"
+      type: "datetime64[ns]"
+    - column_pattern: "^MT_\\d{3}$"
+      type: "float64"
+
+  # Contract 3: The Feature Matrix (Post-Engineering)
+  # Note: 'timestamp' is dropped because it's non-numeric. 
+  # Note: 'total_load' is NOT here because it is the target, not a feature.
+  engineered_schema:
+    - column: "timestamp"
+      type: "datetime64[ns]"
+    - column_pattern: "^MT_\\d{3}$"
+      type: "float64"
+    - column: "hour_of_day"
+      type: "int64"
+    - column: "day_of_week"
+      type: "int64"
+    - column: "is_weekend"
+      type: "int64"
+    - column: "total_load"
+      type: "float64"

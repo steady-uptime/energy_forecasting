@@ -1,0 +1,9 @@
+Dataset License Information
+
+Dataset: Electricity Load Diagrams 2011–2014
+Source: UCI Machine Learning Repository
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+Attribution: This project uses the Electricity Load Diagrams 2011–2014 
+dataset provided by the UCI Machine Learning Repository. All rights 
+and permissions are reserved by the original authors under 
+the CC BY 4.0 license.

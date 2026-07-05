@@ -1,0 +1,8 @@
+# configs/logging.yaml
+logging:
+  level: "DEBUG"
+  # Structured format for easy parsing by ELK/CloudWatch
+  format: "{timestamp} | {level} | {message} | {module}"
+  rotation_mb: "500 MB"
+  retention_days: 14
+  file_path: "logs/pipeline.log"

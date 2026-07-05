@@ -1,0 +1,9 @@
+# Development Dependencies
+-r requirements.txt
+
+# Visualization
+matplotlib==3.11.0
+seaborn==0.13.2
+
+# Testing & Quality Assurance
+pytest==9.1.1

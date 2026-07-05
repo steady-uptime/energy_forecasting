@@ -1,0 +1,15 @@
+# configs/artifacts.yaml
+# ARTIFACTS & PERSISTENCE LAYER (I/O Gateway)
+# ---------------------------------------------------------
+# Defines the structure for all persistent outputs.
+# These paths are used by the ModelStore to ensure 
+# consistent write operations across different runs.
+
+
+artifacts:
+  base_path: "artifacts"
+  models_path: "artifacts/models"
+  metadata_path: "artifacts/metadata"
+  reports_path: "artifacts/reports"
+  input_file: "LD2011_2014.txt"
+  output_file: "cleaned_data.csv"
