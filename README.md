@@ -8,108 +8,126 @@ Source: UCI Machine Learning Repository
 License: Creative Commons Attribution 4.0 International (CC BY 4.0)
 Description: This dataset contains hourly electricity load data for 370 clients, used to train the energy forecasting model.
 
-
-
 # Modular AutoML Energy Forecasting System
 
-![Project Status](https://img.shields.io/badge/Status-Production_Ready-blueviolet?style=for-the-badge)
+![Python](https://img.shields.io/badge/python-3.9+-blue)
+![MLOps](https://img.shields.io/badge/MLOps-Production_Grade-orange)
+![Architecture](https://img.shields.io/badge/Architecture-Service_Oriented-green)
 
-This repository demonstrates a modular, production-ready MLOps architecture designed for scalability, portability, and maintainability. It moves beyond standard research notebooks by implementing strict **Software Engineering** principles, ensuring a seamless transition from model development to production deployment via a **Kubernetes-native orchestration layer.**
+## 🚀 Project Overview
+This project is a production-grade, configuration-driven MLOps framework designed for energy-consumption forecasting. Unlike standard ML scripts, this system treats Machine Learning as a set of **decoupled, modular services**. 
 
-## 🏗 Architecture Principles
+The goal is to solve the "Hidden Technical Debt in ML Systems" by enforcing strict engineering principles: **reproducibility, testability, and portability.**
 
-To ensure production readiness, this project adheres to five core engineering constraints:
+### 🎯 Core Engineering Laws
+To ensure production readiness, the system strictly adheres to five architectural laws:
+1.  **Zero Hardcoding:** No absolute paths; all paths are resolved dynamically via a central configuration loader.
+2.  **Config-Driven Architecture:** All hyperparameters, file paths, and feature schemas reside in `.yaml` files.
+3.  **Portability First:** Designed to run on any machine by using `pathlib` for cross-platform compatibility.
+4.  **Decoupled Logic:** Complete separation of Data Engineering, Model Engineering, and Orchestration.
+5.  **Singleton Config:** A single source of truth for the project root and global settings, ensuring consistency across all modules.
 
-1.  **Strongly-Typed Configuration Contracts**: Zero hardcoding. All hyperparameters, file paths, and transformation rules are externalized in `configs/` and mapped to **Dataclasses**. This enforces a "Fail-Fast" mechanism where configuration errors are caught during the system's boot phase.
-2.  **Decoupled Logic (Separation of Concerns)**: Strict separation between Data Engineering (ETL), Model Engineering (Training/Inference), and Orchestration (Workflow Management). Components interact via defined interfaces, not shared state.
-3.  **Portability & Dynamic Resolution**: All filesystem paths are resolved dynamically via a **Singleton Configuration Loader** using `pathlib`. This ensures the project is environment-agnostic and runs on any OS without modification to the source code.
-4.  **Dynamic Contract Validation**: A dedicated validation layer enforces data integrity by validating the **runtime-generated schema** emitted by the Feature Engineering worker. This ensures the "Data Contract" is honored before data is handed off to the Model Worker.
-5.  **Observability & Traceability**: Centralized logging using `loguru` for structured, leveled telemetry. Automated metadata serialization ensures experiment lineage (hyperparameters, metrics, and model URIs) is captured for every run.
+---
 
-## 🚀 Project Status
+## 🏗 System Architecture
 
-- [x] **Phase 1: Configuration Engine** (Singleton Config Loader, Dataclass Schema Enforcement)
-- [x] **Phase 2: Data Engineering Pipeline** (Worker-based ETL, Dynamic Preprocessing)
-- [x] **Phase 3: Model Engineering** (Trainable Workers, Artifact Management)
-- [x] **Phase 4: Evaluation & Persistence** (Metrics, Logging, Metadata Serialization)
-- [x] **Phase 5: Containerization & Testing** (Docker Environment Parity, Unit Testing)
-- [x] **Phase 6: Orchestration** (Kubernetes Jobs, ConfigMaps, Persistent Volume Mapping)
+The system is organized into five distinct layers to separate concerns:
 
-## 🛠 Key Engineering Achievements
+### A. Data & Configuration Layer
+*   **Config Module:** Centralized YAML configuration management.
+*   **Data Access Module:** Abstracted data repository (supports local, SQL, and Cloud storage).
 
-- **Singleton Pattern**: Implemented for Configuration Management to provide a **Single Source of Truth** and prevent redundant I/O operations.
-- **Abstract Base Classes (ABC)**: Defines a strict contract for all Model Workers, ensuring interchangeability of different ML algorithms (**Polymorphism**).
-- **Dependency Injection (DI)**: Preprocessing rules and persistence engines are injected into workers, decoupling the "How" (logic) from the "What" (configuration).
-- **Contract Validation**: A dedicated validation layer ensures the data "contract" is honored at every gate in the pipeline, preventing silent failures and downstream errors.
-- **Kubernetes Orchestration**: Transitioned from Docker Compose (Composition) to K8s Jobs (Orchestration), allowing for managed lifecycle execution and **ConfigMap-driven** environment injection.
-- **Persistent State Management**: Implemented a **Pathing Contract** using Kubernetes Volumes to bridge the gap between host-machine storage and containerized file systems, ensuring data persistence across ephemeral container lifecycles.
+### B. Core ML Lifecycle (Service-Oriented)
+Each phase is a discrete service with clear input/output contracts:
+*   **Ingestion $\rightarrow$ Preprocessing $\rightarrow$ Feature Engineering $\rightarrow$ Model Search $\rightarrow$ Evaluation $\rightarrow$ Registry**
 
-## ⚙️ Component Breakdown
+### C. Orchestration Layer
+Pipelines are defined as **Code-as-DAGs**. Instead of notebooks, the system uses Python scripts to orchestrate service execution:
+*   `train_pipeline.py`: The primary production training flow.
+*   `retrain_pipeline.py`: Triggered by drift signals.
+*   `backfill_pipeline.py`: Handles historical data updates.
 
-### 1. Configuration Management (`src/core/`)
-- **DataClasses**: Provides type safety and schema enforcement for all configuration parameters.
-- **Singleton Loader**: Dynamically calculates the `project_root` and maps YAML files to Dataclasses, providing a centralized, thread-safe configuration object.
+### D. Serving & Interface Layer
+*   **FastAPI Inference API:** Endpoints for `/predict` and `/model_metadata`.
+*   **CLI Tools:** Command-line interface for manual pipeline execution and champion selection.
 
-### 2. Data Engineering (`src/core/`, `src/infra/`)
-- **Worker Pattern**: Data loading and preprocessing are abstracted into dedicated worker classes.
-- **Feature Engineering**: Isolated module for extracting features and encoding categorical variables.
-- **Validator Module**: A generic, immutable utility that performs **Source Contract Validation** (verifying raw data integrity) and **Transformation Contract Validation** (verifying engineered features) at every gate.
+### E. Observability & Governance
+*   **Experiment Tracking:** Automated logging of hyperparameters and metrics.
+*   **Data Validation Gatekeepers:** Strict schema validation between every pipeline stage.
+*   **Model Cards:** Auto-generated documentation for every registered model.
 
-### 3. Model Engineering (`src/core/`)
-- **Contract Definition**: Uses ABCs to ensure every model implementation supports a standardized `.train()`, `.predict()`, and `.save()` interface.
-- **Persistence Layer**: Standardized serialization using `joblib` for model weights and `json` for evaluation metadata.
+---
 
-### 4. Orchestration (`pipelines/`)
-- **Orchestrator Pattern**: `pipelines/train_pipeline.py` acts as the primary entry point, delegating tasks to specific modules. It manages the workflow topology without knowing the internal implementation details of the workers.
+## 🛠 Tech Stack
+*   **Language:** Python (Type Hinted)
+*   **Orchestration:** Custom Pipeline Orchestrator (Modular Service Pattern)
+*   **Data Handling:** Pandas, NumPy, Pathlib
+*   **ML Frameworks:** Scikit-Learn (Random Forest, etc.)
+*   **Logging:** Loguru (Structured logging)
+*   **Configuration:** PyYAML, Dataclasses
+*   **API:** FastAPI (Planned)
+*   **Deployment:** Docker (Planned)
 
-## ⚙️ Development & Deployment Setup
+---
 
-### 1. Local Development (Virtual Environment)
+## 📈 Project Milestones & Roadmap
 
-```bash
-# Create and activate environment
-python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-.\.venv\Scripts\activate   # Windows
+### ✅ Completed Milestones
+- [x] **Singleton Configuration Loader:** Implemented a type-safe, environment-aware config loader using Dataclasses.
+- [x] **Service-Oriented Architecture:** Built standalone services for Ingestion, Preprocessing, and Feature Engineering.
+- [x] **Data Validation Gatekeepers:** Implemented `DataValidator` to enforce schema contracts between pipeline stages (Raw $\rightarrow$ Sanitized $\rightarrow$ Engineered).
+- [x] **Model Worker Factory:** Implemented the Factory Pattern to decouple the orchestrator from specific model implementations (e.g., Random Forest).
+- [x] **Train Pipeline:** A fully functional `train_pipeline.py` that executes the end-to-end flow from raw CSV to saved model and metrics.
+- [x] **Structured Logging:** Integrated `loguru` with `run_id` tracking for easy debugging in production.
 
-# Install dependencies
-pip install -r requirements.txt
+### 🏗 In Progress / Planned
+- [ ] **Model Registry:** A persistent storage system to version models, tags, and metadata.
+- [ ] **Monitoring Service:** Implementation of drift detection signals to trigger retraining.
+- [ ] **Retrain Pipeline:** Automated DAG for model updating based on production performance.
+- [ ] **FastAPI Deployment:** Wrapping the model loader in a production-ready REST API.
+- [ ] **Dockerization:** Multi-stage Docker builds for consistent environment deployment.
 
-# Execute training pipeline
-python -m pipelines.train_pipeline
+---
+
+## 💻 Getting Started
+
+### Prerequisites
+*   Python 3.9+
+*   Virtual Environment (`venv` or `conda`)
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/energy-forecasting-mlops.git
+   cd energy-forecasting-mlops
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Run the training pipeline:
+   ```bash
+   python -m pipelines.train_pipeline
+   ```
+
+---
+
+## 📂 Directory Structure
+```text
+.
+├── configs/                # YAML configuration files
+├── data/                   # Raw, processed, and interim data
+├── logs/                   # Structured pipeline logs
+├── models/                 # Saved model artifacts
+├── pipelines/             # Pipeline Orchestrators (DAGs)
+├── src/                   # Core Logic
+│   ├── core/              # Configuration, Services, Validation
+│   ├── infra/             # Logging, Artifact Management, Repositories
+│   └── utils/             # Helper functions
+└── requirements.txt
 ```
 
-### 2. Kubernetes Deployment (Production Simulation)
-This project utilizes a **Kubernetes Job** to execute the training lifecycle.
+⚖️ Legal & Compliance
+This project uses the Electricity Load Diagrams 2011–2014 dataset, sourced from the UCI Machine Learning Repository. The data is licensed under CC BY 4.0. All modifications to the data are for educational and portfolio purposes only.
 
-**Deploy Configuration & Job:**
-```bash
-# Apply the ConfigMap (Environment Variables)
-kubectl apply -f k8s/configmap.yaml
-
-# Apply the Training Job
-kubectl apply -f k8s/job.yaml
-```
-
-**Monitor Execution:**
-```bash
-# View pod status
-kubectl get pods -l job=energy-forecast-train-job
-
-# Stream logs from the training worker
-kubectl logs -f $(kubectl get pods -l job=energy-forecast-train-job -o jsonpath='{.items[0].metadata.name}')
-```
-
-## 🐳 Infrastructure Stack
-
-- **Containerization**: Docker (Production-slim Python base).
-- **Orchestration**: Kubernetes (K8s) Jobs for one-off training tasks.
-- **Configuration Management**: K8s ConfigMaps for environment variable injection.
-- **Storage**: Kubernetes Volumes with `hostPath` mapping for persistent data/model/log storage.
-- **Observability**: Structured logging via `loguru`.
-
-## 🧪 Testing & Quality Assurance
-
-- **Unit/Integration Tests**: Automated test suite in `tests/` using `pytest`.
-- **Schema Validation**: Contract validation gates between Data Engineering and Model Engineering modules.
-- **Logging**: Centralized logging routed to the `logs/` directory with structured, leveled telemetry.
+_Note: The pipeline includes a DataValidator gatekeeper to ensure the input data conforms to the expected schema before processing, ensuring robustness against data drift or schema changes._
