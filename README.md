@@ -1,13 +1,3 @@
-
-
-
-
-Dataset
-Name: Electricity Load Diagrams 2011–2014
-Source: UCI Machine Learning Repository
-License: Creative Commons Attribution 4.0 International (CC BY 4.0)
-Description: This dataset contains hourly electricity load data for 370 clients, used to train the energy forecasting model.
-
 # Modular AutoML Energy Forecasting System
 
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
