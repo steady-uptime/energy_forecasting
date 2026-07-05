@@ -32,21 +32,21 @@ This diagram represents the **System Topology**. It separates the "Core" (ML Log
 <details>
 <summary>View Architecture Logic (Mermaid Code)</summary>
 
+```text
+
 graph TD
-    %% User Interface / Entry Points
+
     subgraph UI["User Interface / Entry Points"]
         CLI[CLI Tools]
         API[FastAPI Inference]
     end
 
-    %% Orchestration Layer
     subgraph ORCH["Orchestration Layer"]
         TrainPipe[Train Pipeline]
         RetrainPipe[Retrain Pipeline]
         MonitorPipe[Monitor Pipeline]
     end
 
-    %% Core ML Logic
     subgraph CORE["Core ML Logic"]
         Ingestion[Ingestion Service]
         Preprocessing[Preprocessing Service]
@@ -56,7 +56,6 @@ graph TD
         Registry[Model Registry]
     end
 
-    %% Infrastructure Layer
     subgraph INFRA["Infrastructure Layer"]
         Storage[Model Store & Data Repo]
         Tracker[Experiment Tracker]
@@ -64,12 +63,10 @@ graph TD
         Secrets[Secrets Management]
     end
 
-    %% Configuration Layer
     subgraph CONFIG["Configuration Layer"]
         Config[YAML Configs]
     end
 
-    %% Flow logic
     Config -.-> TrainPipe
     Config -.-> Registry
     
@@ -86,7 +83,6 @@ graph TD
     MonitorPipe -- "Drift Detected" --> RetrainPipe
     RetrainPipe --> TrainPipe
 
-    %% Infra Connections (explicit, GitHub-safe)
     Ingestion --- Storage
     Preprocessing --- Storage
     Features --- Storage
@@ -107,6 +103,7 @@ graph TD
     Search --- Logger
     Eval --- Logger
     Registry --- Logger
+```
 
 </details>
 
@@ -121,9 +118,10 @@ This diagram illustrates the **Worker Pattern** and **Data Flow**. It highlights
 <details>
 <summary>View Training Pipeline (Mermaid Code)</summary>
 
+```text
+
 flowchart TD
 
-%% Data Engineering
 subgraph DE["Data Engineering"]
     RawData[(Raw Data)] --> Load[Loader]
     Load --> Val1{Validator}
@@ -133,7 +131,6 @@ subgraph DE["Data Engineering"]
     Pre --> Processed[(Processed Data)]
 end
 
-%% Feature Engineering
 subgraph FE["Feature Engineering"]
     Processed --> Feat[Feature Engineer]
     Feat --> Matrix[Feature Matrix]
@@ -142,7 +139,6 @@ subgraph FE["Feature Engineering"]
     Val2 -- Pass --> Split[Train/Test Split]
 end
 
-%% Model Engineering (AutoML)
 subgraph ME["Model Engineering (AutoML)"]
     Split --> Search[Search Space Loop]
     Search --> Train[Model Worker]
@@ -151,19 +147,18 @@ subgraph ME["Model Engineering (AutoML)"]
     Eval --> Champion{Champion Selection}
 end
 
-%% Registry & Persistence
 subgraph RP["Registry & Persistence"]
     Champion -- "Winner" --> Reg[Register Model]
     Reg --> Store[(Model Store)]
     Reg --> Tracker[Experiment Tracker]
 end
 
-%% Styles
 style Val1 fill:#f96,stroke:#333
 style Val2 fill:#f96,stroke:#333
 style Champion fill:#f96,stroke:#333
 style Error fill:#ff9999
 ```
+
 </details>
 
 ---
@@ -177,22 +172,22 @@ This diagram demonstrates the **Observability & Automation** lifecycle. It shows
 <details>
 <summary>View Production Feedback Loop (Mermaid Code)</summary>
 
+```text
+
 graph TD
-    %% Production Environment
+
     subgraph PROD["Production Environment"]
         LiveData[(Live Data)] --> API[Inference API]
         API --> Prediction[Prediction]
         Prediction --> Monitor[Monitoring Service]
     end
 
-    %% Observability & Governance
     subgraph OBS["Observability & Governance"]
         Monitor --> Drift{Drift / Error?}
         Drift -- No --> Prediction
         Drift -- Yes --> Alert[Alert / Trigger]
     end
 
-    %% Automated Retraining
     subgraph AUTO["Automated Retraining"]
         Alert --> RetrainPipe[Retrain Pipeline]
         RetrainPipe --> TrainPipe[Training Pipeline]
@@ -203,6 +198,7 @@ graph TD
     style Drift fill:#f96,stroke:#333
     style Alert fill:#ff9999
     style Registry fill:#bbf,stroke:#333
+```
 
 </details>
 
@@ -288,6 +284,8 @@ graph TD
 ```
 
 ⚖️ Legal & Compliance
+```text
 This project uses the Electricity Load Diagrams 2011–2014 dataset, sourced from the UCI Machine Learning Repository. The data is licensed under CC BY 4.0. All modifications to the data are for educational and portfolio purposes only.
+```
 
 _Note: The pipeline includes a DataValidator gatekeeper to ensure the input data conforms to the expected schema before processing, ensuring robustness against data drift or schema changes._
