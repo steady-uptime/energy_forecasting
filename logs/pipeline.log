@@ -1,0 +1,198 @@
+2026-07-04 16:08:03.564 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-04 16:08:03.565 | INFO     | __main__:main:22 - Configuration loaded successfully.
+2026-07-04 16:08:03.565 | INFO     | __main__:main:36 - --- Starting Pipeline: Data Engineering Phase ---
+2026-07-04 16:08:03.584 | DEBUG    | src.infra.data_repository:read_csv:65 - Resolved 370 dtypes from schema patterns.
+2026-07-04 16:08:11.336 | INFO     | src.core.ingestion_service:load_raw_energy_data:36 - Ingestion successful. Final shape: (140256, 371)
+2026-07-04 16:08:11.336 | INFO     | __main__:main:47 - Validating Raw Data Contract...
+2026-07-04 16:08:11.337 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-04 16:08:11.337 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 16:08:11.343 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 16:08:11.344 | INFO     | src.core.preprocessing_service:__init__:24 - DataPreprocessor initialized. Target: C:\mlops\projects\energy_forecasting\data\processed
+2026-07-04 16:08:11.472 | INFO     | src.core.preprocessing_service:clean_data:28 - Starting data cleaning (Sanitization) phase...
+2026-07-04 16:08:11.473 | DEBUG    | src.core.preprocessing_service:clean_data:35 - Dropped columns: []
+2026-07-04 16:08:36.240 | DEBUG    | src.core.preprocessing_service:clean_data:43 - Converted MT_* columns to numeric.
+2026-07-04 16:08:36.368 | DEBUG    | src.core.preprocessing_service:clean_data:53 - Applied frequency conversion factor 0.25 to MT_* columns.
+2026-07-04 16:08:36.549 | DEBUG    | src.core.preprocessing_service:clean_data:77 - Applied imputation strategy: forward_fill
+2026-07-04 16:08:36.550 | INFO     | __main__:main:59 - Validating Preprocessed Data Contract...
+2026-07-04 16:08:36.550 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 16:08:36.550 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 16:08:36.558 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 16:08:37.138 | DEBUG    | src.core.feature_engineering:transform:33 - Created total_load from 370 MT_* columns.
+2026-07-04 16:08:37.159 | DEBUG    | src.core.feature_engineering:transform:49 - Created time-based engineered features.
+2026-07-04 16:08:37.160 | INFO     | __main__:main:71 - Validating Engineered Data Contract...
+2026-07-04 16:08:37.161 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 16:08:37.161 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 16:08:37.169 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 16:08:58.159 | INFO     | src.core.preprocessing_service:save_processed_data:85 - Successfully saved sanitized data to: C:\mlops\projects\energy_forecasting\data\processed\cleaned_data.csv
+2026-07-04 16:08:58.263 | INFO     | src.core.splitter_service:split:48 - Split complete. X_train shape: (105120, 373). Features: ['MT_001', 'MT_002', 'MT_003', 'MT_004', 'MT_005', 'MT_006', 'MT_007', 'MT_008', 'MT_009', 'MT_010', 'MT_011', 'MT_012', 'MT_013', 'MT_014', 'MT_015', 'MT_016', 'MT_017', 'MT_018', 'MT_019', 'MT_020', 'MT_021', 'MT_022', 'MT_023', 'MT_024', 'MT_025', 'MT_026', 'MT_027', 'MT_028', 'MT_029', 'MT_030', 'MT_031', 'MT_032', 'MT_033', 'MT_034', 'MT_035', 'MT_036', 'MT_037', 'MT_038', 'MT_039', 'MT_040', 'MT_041', 'MT_042', 'MT_043', 'MT_044', 'MT_045', 'MT_046', 'MT_047', 'MT_048', 'MT_049', 'MT_050', 'MT_051', 'MT_052', 'MT_053', 'MT_054', 'MT_055', 'MT_056', 'MT_057', 'MT_058', 'MT_059', 'MT_060', 'MT_061', 'MT_062', 'MT_063', 'MT_064', 'MT_065', 'MT_066', 'MT_067', 'MT_068', 'MT_069', 'MT_070', 'MT_071', 'MT_072', 'MT_073', 'MT_074', 'MT_075', 'MT_076', 'MT_077', 'MT_078', 'MT_079', 'MT_080', 'MT_081', 'MT_082', 'MT_083', 'MT_084', 'MT_085', 'MT_086', 'MT_087', 'MT_088', 'MT_089', 'MT_090', 'MT_091', 'MT_092', 'MT_093', 'MT_094', 'MT_095', 'MT_096', 'MT_097', 'MT_098', 'MT_099', 'MT_100', 'MT_101', 'MT_102', 'MT_103', 'MT_104', 'MT_105', 'MT_106', 'MT_107', 'MT_108', 'MT_109', 'MT_110', 'MT_111', 'MT_112', 'MT_113', 'MT_114', 'MT_115', 'MT_116', 'MT_117', 'MT_118', 'MT_119', 'MT_120', 'MT_121', 'MT_122', 'MT_123', 'MT_124', 'MT_125', 'MT_126', 'MT_127', 'MT_128', 'MT_129', 'MT_130', 'MT_131', 'MT_132', 'MT_133', 'MT_134', 'MT_135', 'MT_136', 'MT_137', 'MT_138', 'MT_139', 'MT_140', 'MT_141', 'MT_142', 'MT_143', 'MT_144', 'MT_145', 'MT_146', 'MT_147', 'MT_148', 'MT_149', 'MT_150', 'MT_151', 'MT_152', 'MT_153', 'MT_154', 'MT_155', 'MT_156', 'MT_157', 'MT_158', 'MT_159', 'MT_160', 'MT_161', 'MT_162', 'MT_163', 'MT_164', 'MT_165', 'MT_166', 'MT_167', 'MT_168', 'MT_169', 'MT_170', 'MT_171', 'MT_172', 'MT_173', 'MT_174', 'MT_175', 'MT_176', 'MT_177', 'MT_178', 'MT_179', 'MT_180', 'MT_181', 'MT_182', 'MT_183', 'MT_184', 'MT_185', 'MT_186', 'MT_187', 'MT_188', 'MT_189', 'MT_190', 'MT_191', 'MT_192', 'MT_193', 'MT_194', 'MT_195', 'MT_196', 'MT_197', 'MT_198', 'MT_199', 'MT_200', 'MT_201', 'MT_202', 'MT_203', 'MT_204', 'MT_205', 'MT_206', 'MT_207', 'MT_208', 'MT_209', 'MT_210', 'MT_211', 'MT_212', 'MT_213', 'MT_214', 'MT_215', 'MT_216', 'MT_217', 'MT_218', 'MT_219', 'MT_220', 'MT_221', 'MT_222', 'MT_223', 'MT_224', 'MT_225', 'MT_226', 'MT_227', 'MT_228', 'MT_229', 'MT_230', 'MT_231', 'MT_232', 'MT_233', 'MT_234', 'MT_235', 'MT_236', 'MT_237', 'MT_238', 'MT_239', 'MT_240', 'MT_241', 'MT_242', 'MT_243', 'MT_244', 'MT_245', 'MT_246', 'MT_247', 'MT_248', 'MT_249', 'MT_250', 'MT_251', 'MT_252', 'MT_253', 'MT_254', 'MT_255', 'MT_256', 'MT_257', 'MT_258', 'MT_259', 'MT_260', 'MT_261', 'MT_262', 'MT_263', 'MT_264', 'MT_265', 'MT_266', 'MT_267', 'MT_268', 'MT_269', 'MT_270', 'MT_271', 'MT_272', 'MT_273', 'MT_274', 'MT_275', 'MT_276', 'MT_277', 'MT_278', 'MT_279', 'MT_280', 'MT_281', 'MT_282', 'MT_283', 'MT_284', 'MT_285', 'MT_286', 'MT_287', 'MT_288', 'MT_289', 'MT_290', 'MT_291', 'MT_292', 'MT_293', 'MT_294', 'MT_295', 'MT_296', 'MT_297', 'MT_298', 'MT_299', 'MT_300', 'MT_301', 'MT_302', 'MT_303', 'MT_304', 'MT_305', 'MT_306', 'MT_307', 'MT_308', 'MT_309', 'MT_310', 'MT_311', 'MT_312', 'MT_313', 'MT_314', 'MT_315', 'MT_316', 'MT_317', 'MT_318', 'MT_319', 'MT_320', 'MT_321', 'MT_322', 'MT_323', 'MT_324', 'MT_325', 'MT_326', 'MT_327', 'MT_328', 'MT_329', 'MT_330', 'MT_331', 'MT_332', 'MT_333', 'MT_334', 'MT_335', 'MT_336', 'MT_337', 'MT_338', 'MT_339', 'MT_340', 'MT_341', 'MT_342', 'MT_343', 'MT_344', 'MT_345', 'MT_346', 'MT_347', 'MT_348', 'MT_349', 'MT_350', 'MT_351', 'MT_352', 'MT_353', 'MT_354', 'MT_355', 'MT_356', 'MT_357', 'MT_358', 'MT_359', 'MT_360', 'MT_361', 'MT_362', 'MT_363', 'MT_364', 'MT_365', 'MT_366', 'MT_367', 'MT_368', 'MT_369', 'MT_370', 'hour_of_day', 'day_of_week', 'is_weekend']
+2026-07-04 16:08:58.267 | INFO     | __main__:main:90 - --- Starting Model Engineering Phase ---
+2026-07-04 16:08:58.269 | INFO     | src.infra.artifact_manager:__init__:30 - ArtifactManager initialized. Project Root: C:\mlops\projects\energy_forecasting
+2026-07-04 16:08:58.269 | INFO     | src.core.modeling:get_worker:60 - Factory instantiating worker for: random_forest_regressor
+2026-07-04 16:08:58.269 | INFO     | src.core.modeling:train:32 - Training RandomForestRegressor model...
+2026-07-04 16:09:15.524 | INFO     | src.infra.artifact_manager:save_model:38 - Model artifact saved to: artifacts\models\Energy_Forecast_RF_Regressor.joblib
+2026-07-04 16:09:15.525 | INFO     | __main__:main:110 - --- Starting Evaluation Phase ---
+2026-07-04 16:09:15.525 | INFO     | src.core.evaluator:evaluate:9 - Evaluating model performance...
+2026-07-04 16:09:15.580 | INFO     | src.core.evaluator:evaluate:17 - Evaluation complete. Metrics: {'rmse': 2630.757976362563, 'mse': 6920887.530195248}
+2026-07-04 16:09:15.582 | INFO     | src.infra.artifact_manager:save_metrics:68 - Metrics artifact saved to: artifacts\metadata\Energy_Forecast_RF_Regressor_metrics.json
+2026-07-04 16:09:15.582 | SUCCESS  | __main__:main:124 - Pipeline executed successfully.
+2026-07-04 17:47:45.862 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-04 17:47:45.862 | INFO     | __main__:main:22 - Configuration loaded successfully.
+2026-07-04 17:47:45.862 | INFO     | __main__:main:36 - --- Starting Pipeline: Data Engineering Phase ---
+2026-07-04 17:47:45.887 | DEBUG    | src.infra.data_repository:read_csv:65 - Resolved 370 dtypes from schema patterns.
+2026-07-04 17:47:53.515 | INFO     | src.core.ingestion_service:load_raw_energy_data:36 - Ingestion successful. Final shape: (140256, 371)
+2026-07-04 17:47:53.515 | INFO     | __main__:main:47 - Validating Raw Data Contract...
+2026-07-04 17:47:53.515 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-04 17:47:53.515 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 17:47:53.522 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 17:47:53.522 | INFO     | src.core.preprocessing_service:__init__:24 - DataPreprocessor initialized. Target: C:\mlops\projects\energy_forecasting\data\processed
+2026-07-04 17:47:53.651 | INFO     | src.core.preprocessing_service:clean_data:28 - Starting data cleaning (Sanitization) phase...
+2026-07-04 17:47:53.652 | DEBUG    | src.core.preprocessing_service:clean_data:35 - Dropped columns: []
+2026-07-04 17:48:17.992 | DEBUG    | src.core.preprocessing_service:clean_data:43 - Converted MT_* columns to numeric.
+2026-07-04 17:48:18.105 | DEBUG    | src.core.preprocessing_service:clean_data:53 - Applied frequency conversion factor 0.25 to MT_* columns.
+2026-07-04 17:48:18.286 | DEBUG    | src.core.preprocessing_service:clean_data:77 - Applied imputation strategy: forward_fill
+2026-07-04 17:48:18.286 | INFO     | __main__:main:59 - Validating Preprocessed Data Contract...
+2026-07-04 17:48:18.286 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 17:48:18.287 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 17:48:18.294 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 17:48:18.896 | DEBUG    | src.core.feature_engineering:transform:33 - Created total_load from 370 MT_* columns.
+2026-07-04 17:48:18.915 | DEBUG    | src.core.feature_engineering:transform:49 - Created time-based engineered features.
+2026-07-04 17:48:18.917 | INFO     | __main__:main:71 - Validating Engineered Data Contract...
+2026-07-04 17:48:18.918 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 17:48:18.918 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 17:48:18.925 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 17:48:38.345 | INFO     | src.core.preprocessing_service:save_processed_data:85 - Successfully saved sanitized data to: C:\mlops\projects\energy_forecasting\data\processed\cleaned_data.csv
+2026-07-04 17:48:38.445 | INFO     | src.core.splitter_service:split:48 - Split complete. X_train shape: (105120, 373). Features: ['MT_001', 'MT_002', 'MT_003', 'MT_004', 'MT_005', 'MT_006', 'MT_007', 'MT_008', 'MT_009', 'MT_010', 'MT_011', 'MT_012', 'MT_013', 'MT_014', 'MT_015', 'MT_016', 'MT_017', 'MT_018', 'MT_019', 'MT_020', 'MT_021', 'MT_022', 'MT_023', 'MT_024', 'MT_025', 'MT_026', 'MT_027', 'MT_028', 'MT_029', 'MT_030', 'MT_031', 'MT_032', 'MT_033', 'MT_034', 'MT_035', 'MT_036', 'MT_037', 'MT_038', 'MT_039', 'MT_040', 'MT_041', 'MT_042', 'MT_043', 'MT_044', 'MT_045', 'MT_046', 'MT_047', 'MT_048', 'MT_049', 'MT_050', 'MT_051', 'MT_052', 'MT_053', 'MT_054', 'MT_055', 'MT_056', 'MT_057', 'MT_058', 'MT_059', 'MT_060', 'MT_061', 'MT_062', 'MT_063', 'MT_064', 'MT_065', 'MT_066', 'MT_067', 'MT_068', 'MT_069', 'MT_070', 'MT_071', 'MT_072', 'MT_073', 'MT_074', 'MT_075', 'MT_076', 'MT_077', 'MT_078', 'MT_079', 'MT_080', 'MT_081', 'MT_082', 'MT_083', 'MT_084', 'MT_085', 'MT_086', 'MT_087', 'MT_088', 'MT_089', 'MT_090', 'MT_091', 'MT_092', 'MT_093', 'MT_094', 'MT_095', 'MT_096', 'MT_097', 'MT_098', 'MT_099', 'MT_100', 'MT_101', 'MT_102', 'MT_103', 'MT_104', 'MT_105', 'MT_106', 'MT_107', 'MT_108', 'MT_109', 'MT_110', 'MT_111', 'MT_112', 'MT_113', 'MT_114', 'MT_115', 'MT_116', 'MT_117', 'MT_118', 'MT_119', 'MT_120', 'MT_121', 'MT_122', 'MT_123', 'MT_124', 'MT_125', 'MT_126', 'MT_127', 'MT_128', 'MT_129', 'MT_130', 'MT_131', 'MT_132', 'MT_133', 'MT_134', 'MT_135', 'MT_136', 'MT_137', 'MT_138', 'MT_139', 'MT_140', 'MT_141', 'MT_142', 'MT_143', 'MT_144', 'MT_145', 'MT_146', 'MT_147', 'MT_148', 'MT_149', 'MT_150', 'MT_151', 'MT_152', 'MT_153', 'MT_154', 'MT_155', 'MT_156', 'MT_157', 'MT_158', 'MT_159', 'MT_160', 'MT_161', 'MT_162', 'MT_163', 'MT_164', 'MT_165', 'MT_166', 'MT_167', 'MT_168', 'MT_169', 'MT_170', 'MT_171', 'MT_172', 'MT_173', 'MT_174', 'MT_175', 'MT_176', 'MT_177', 'MT_178', 'MT_179', 'MT_180', 'MT_181', 'MT_182', 'MT_183', 'MT_184', 'MT_185', 'MT_186', 'MT_187', 'MT_188', 'MT_189', 'MT_190', 'MT_191', 'MT_192', 'MT_193', 'MT_194', 'MT_195', 'MT_196', 'MT_197', 'MT_198', 'MT_199', 'MT_200', 'MT_201', 'MT_202', 'MT_203', 'MT_204', 'MT_205', 'MT_206', 'MT_207', 'MT_208', 'MT_209', 'MT_210', 'MT_211', 'MT_212', 'MT_213', 'MT_214', 'MT_215', 'MT_216', 'MT_217', 'MT_218', 'MT_219', 'MT_220', 'MT_221', 'MT_222', 'MT_223', 'MT_224', 'MT_225', 'MT_226', 'MT_227', 'MT_228', 'MT_229', 'MT_230', 'MT_231', 'MT_232', 'MT_233', 'MT_234', 'MT_235', 'MT_236', 'MT_237', 'MT_238', 'MT_239', 'MT_240', 'MT_241', 'MT_242', 'MT_243', 'MT_244', 'MT_245', 'MT_246', 'MT_247', 'MT_248', 'MT_249', 'MT_250', 'MT_251', 'MT_252', 'MT_253', 'MT_254', 'MT_255', 'MT_256', 'MT_257', 'MT_258', 'MT_259', 'MT_260', 'MT_261', 'MT_262', 'MT_263', 'MT_264', 'MT_265', 'MT_266', 'MT_267', 'MT_268', 'MT_269', 'MT_270', 'MT_271', 'MT_272', 'MT_273', 'MT_274', 'MT_275', 'MT_276', 'MT_277', 'MT_278', 'MT_279', 'MT_280', 'MT_281', 'MT_282', 'MT_283', 'MT_284', 'MT_285', 'MT_286', 'MT_287', 'MT_288', 'MT_289', 'MT_290', 'MT_291', 'MT_292', 'MT_293', 'MT_294', 'MT_295', 'MT_296', 'MT_297', 'MT_298', 'MT_299', 'MT_300', 'MT_301', 'MT_302', 'MT_303', 'MT_304', 'MT_305', 'MT_306', 'MT_307', 'MT_308', 'MT_309', 'MT_310', 'MT_311', 'MT_312', 'MT_313', 'MT_314', 'MT_315', 'MT_316', 'MT_317', 'MT_318', 'MT_319', 'MT_320', 'MT_321', 'MT_322', 'MT_323', 'MT_324', 'MT_325', 'MT_326', 'MT_327', 'MT_328', 'MT_329', 'MT_330', 'MT_331', 'MT_332', 'MT_333', 'MT_334', 'MT_335', 'MT_336', 'MT_337', 'MT_338', 'MT_339', 'MT_340', 'MT_341', 'MT_342', 'MT_343', 'MT_344', 'MT_345', 'MT_346', 'MT_347', 'MT_348', 'MT_349', 'MT_350', 'MT_351', 'MT_352', 'MT_353', 'MT_354', 'MT_355', 'MT_356', 'MT_357', 'MT_358', 'MT_359', 'MT_360', 'MT_361', 'MT_362', 'MT_363', 'MT_364', 'MT_365', 'MT_366', 'MT_367', 'MT_368', 'MT_369', 'MT_370', 'hour_of_day', 'day_of_week', 'is_weekend']
+2026-07-04 17:48:38.447 | INFO     | __main__:main:90 - --- Starting Model Engineering Phase ---
+2026-07-04 17:48:38.447 | INFO     | src.infra.artifact_manager:__init__:30 - ArtifactManager initialized. Project Root: C:\mlops\projects\energy_forecasting
+2026-07-04 17:48:38.447 | INFO     | src.core.modeling:get_worker:60 - Factory instantiating worker for: random_forest_regressor
+2026-07-04 17:48:38.448 | INFO     | src.core.modeling:train:32 - Training RandomForestRegressor model...
+2026-07-04 17:48:51.662 | INFO     | src.infra.artifact_manager:save_model:38 - Model artifact saved to: artifacts\models\Energy_Forecast_RF_Regressor.joblib
+2026-07-04 17:48:51.663 | INFO     | __main__:main:110 - --- Starting Evaluation Phase ---
+2026-07-04 17:48:51.663 | INFO     | src.core.evaluator:evaluate:9 - Evaluating model performance...
+2026-07-04 17:48:51.712 | INFO     | src.core.evaluator:evaluate:17 - Evaluation complete. Metrics: {'rmse': 2630.7579763625627, 'mse': 6920887.530195246}
+2026-07-04 17:48:51.713 | INFO     | src.infra.artifact_manager:save_metrics:68 - Metrics artifact saved to: artifacts\metadata\Energy_Forecast_RF_Regressor_metrics.json
+2026-07-04 17:48:51.713 | SUCCESS  | __main__:main:124 - Pipeline executed successfully.
+2026-07-04 19:02:26.012 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-04 19:02:26.013 | INFO     | __main__:main:26 - Configuration loaded successfully.
+2026-07-04 19:02:26.013 | INFO     | __main__:main:39 - Pipeline started
+2026-07-04 19:02:26.013 | INFO     | __main__:main:45 - Loading raw data
+2026-07-04 19:02:26.013 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-04 19:02:26.014 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-04 19:02:26.032 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-04 19:02:33.023 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-04 19:02:33.669 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-04 19:02:33.669 | INFO     | __main__:main:50 - Validating Raw Data Contract...
+2026-07-04 19:02:33.669 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-04 19:02:33.669 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 19:02:33.676 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 19:02:33.676 | INFO     | __main__:main:53 - Preprocessing started...
+2026-07-04 19:02:33.676 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-04 19:02:33.677 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-04 19:02:33.823 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-04 19:02:57.910 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-04 19:02:58.036 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-04 19:02:58.219 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-04 19:02:58.219 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-04 19:02:58.219 | INFO     | __main__:main:62 - Validating Preprocessed Data Contract...
+2026-07-04 19:02:58.219 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 19:02:58.220 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 19:02:58.227 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 19:02:58.227 | INFO     | __main__:main:65 - Feature Engineering started...
+2026-07-04 19:02:58.227 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-04 19:02:58.228 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-04 19:02:58.791 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-04 19:02:58.810 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-04 19:02:58.811 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-04 19:02:58.811 | INFO     | __main__:main:73 - Validating Engineered Data Contract...
+2026-07-04 19:02:58.811 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 19:02:58.812 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 19:02:58.819 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 19:02:58.819 | INFO     | __main__:main:76 - Saving Processed data...
+2026-07-04 19:03:18.649 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-04 19:03:18.649 | INFO     | __main__:main:82 - Data Splitter - Time Series - started...
+2026-07-04 19:03:18.649 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-04 19:03:18.649 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-04 19:03:18.651 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-04 19:03:18.746 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-04 19:03:18.748 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-04 19:03:18.749 | INFO     | __main__:main:99 - --- Starting Model Engineering Phase ---
+2026-07-04 19:03:18.749 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-04 19:03:18.749 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-04 19:03:18.749 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-04 19:03:31.657 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-04 19:03:31.657 | INFO     | __main__:main:103 - Saving Model
+2026-07-04 19:03:31.682 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-04 19:03:31.682 | INFO     | __main__:main:106 - --- Starting Evaluation Phase ---
+2026-07-04 19:03:31.682 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-04 19:03:31.736 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-04 19:03:31.736 | INFO     | __main__:main:109 - Saving Model Metrics
+2026-07-04 19:03:31.737 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-04 19:03:31.737 | INFO     | __main__:main:118 - Pipeline executed successfully.
+2026-07-04 19:41:05.280 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-04 19:41:05.280 | INFO     | __main__:main:26 - Configuration loaded successfully.
+2026-07-04 19:41:05.281 | INFO     | __main__:main:39 - Pipeline started
+2026-07-04 19:41:05.281 | INFO     | __main__:main:45 - Loading raw data
+2026-07-04 19:41:05.281 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-04 19:41:05.282 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-04 19:41:05.307 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-04 19:41:12.320 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-04 19:41:13.001 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-04 19:41:13.001 | INFO     | __main__:main:50 - Validating Raw Data Contract...
+2026-07-04 19:41:13.001 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-04 19:41:13.001 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 19:41:13.008 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 19:41:13.008 | INFO     | __main__:main:53 - Preprocessing started...
+2026-07-04 19:41:13.008 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-04 19:41:13.009 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-04 19:41:13.141 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-04 19:41:37.247 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-04 19:41:37.360 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-04 19:41:37.541 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-04 19:41:37.541 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-04 19:41:37.541 | INFO     | __main__:main:62 - Validating Preprocessed Data Contract...
+2026-07-04 19:41:37.542 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 19:41:37.542 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 19:41:37.549 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 19:41:37.549 | INFO     | __main__:main:65 - Feature Engineering started...
+2026-07-04 19:41:37.550 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-04 19:41:37.550 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-04 19:41:38.150 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-04 19:41:38.169 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-04 19:41:38.172 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-04 19:41:38.172 | INFO     | __main__:main:73 - Validating Engineered Data Contract...
+2026-07-04 19:41:38.172 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-04 19:41:38.172 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-04 19:41:38.180 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-04 19:41:38.180 | INFO     | __main__:main:76 - Saving Processed data...
+2026-07-04 19:41:58.212 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-04 19:41:58.212 | INFO     | __main__:main:82 - Data Splitter - Time Series - started...
+2026-07-04 19:41:58.213 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-04 19:41:58.213 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-04 19:41:58.215 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-04 19:41:58.312 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-04 19:41:58.314 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-04 19:41:58.314 | INFO     | __main__:main:99 - --- Starting Model Engineering Phase ---
+2026-07-04 19:41:58.314 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-04 19:41:58.315 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-04 19:41:58.315 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-04 19:42:11.668 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-04 19:42:11.668 | INFO     | __main__:main:103 - Saving Model
+2026-07-04 19:42:11.692 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-04 19:42:11.692 | INFO     | __main__:main:106 - --- Starting Evaluation Phase ---
+2026-07-04 19:42:11.692 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-04 19:42:11.742 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-04 19:42:11.742 | INFO     | __main__:main:109 - Saving Model Metrics
+2026-07-04 19:42:11.743 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-04 19:42:11.744 | INFO     | __main__:main:118 - Pipeline executed successfully.
