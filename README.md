@@ -23,7 +23,7 @@ To ensure production readiness, the system strictly adheres to five architectura
 
 The system is organized into five distinct layers to separate concerns, moving beyond a simple script to a **Service-Oriented Architecture (SOA)**.
 
-### 1. High-Level System Architecture (The "Layers")
+### 1. High‑Level System Architecture (Layers)
 
 This diagram represents the **System Topology**. It separates the "Core" (ML Logic) from the "Infra" (Utilities) and "Orchestration" (Execution), ensuring that the ML logic is decoupled from the underlying infrastructure.
 
@@ -31,22 +31,23 @@ This diagram represents the **System Topology**. It separates the "Core" (ML Log
 
 <details>
 <summary>View Architecture Logic (Mermaid Code)</summary>
- ```mermaid
+
 graph TD
-    subgraph "User Interface / Entry Points"
+    %% User Interface / Entry Points
+    subgraph UI["User Interface / Entry Points"]
         CLI[CLI Tools]
         API[FastAPI Inference]
     end
 
-    subgraph "Orchestration Layer"
-        Path1[pipelines/]
+    %% Orchestration Layer
+    subgraph ORCH["Orchestration Layer"]
         TrainPipe[Train Pipeline]
         RetrainPipe[Retrain Pipeline]
         MonitorPipe[Monitor Pipeline]
     end
 
-    subgraph "Core ML Logic"
-        Path2[src/core/]
+    %% Core ML Logic
+    subgraph CORE["Core ML Logic"]
         Ingestion[Ingestion Service]
         Preprocessing[Preprocessing Service]
         Features[Feature Engineering]
@@ -55,16 +56,16 @@ graph TD
         Registry[Model Registry]
     end
 
-    subgraph "Infrastructure Layer"
-        Path3[src/infra/]
-        Storage[Model Store / Data Repo]
+    %% Infrastructure Layer
+    subgraph INFRA["Infrastructure Layer"]
+        Storage[Model Store & Data Repo]
         Tracker[Experiment Tracker]
         Logger[Structured Logger]
         Secrets[Secrets Management]
     end
 
-    subgraph "Configuration Layer"
-        Path4[configs/]
+    %% Configuration Layer
+    subgraph CONFIG["Configuration Layer"]
         Config[YAML Configs]
     end
 
@@ -85,19 +86,33 @@ graph TD
     MonitorPipe -- "Drift Detected" --> RetrainPipe
     RetrainPipe --> TrainPipe
 
-    %% Infra Connections
-    Ingestion & Preprocessing & Features & Search & Eval & Registry --- Storage
-    Ingestion & Preprocessing & Features & Search & Eval & Registry --- Tracker
-    Ingestion & Preprocessing & Features & Search & Eval & Registry --- Logger
+    %% Infra Connections (explicit, GitHub-safe)
+    Ingestion --- Storage
+    Preprocessing --- Storage
+    Features --- Storage
+    Search --- Storage
+    Eval --- Storage
+    Registry --- Storage
 
-    %% Styling to make folder paths look like labels (optional)
-    style Path1 fill:none,stroke:none,color:#666,font-style:italic
-    style Path2 fill:none,stroke:none,color:#666,font-style:italic
-    style Path3 fill:none,stroke:none,color:#666,font-style:italic
-    style Path4 fill:none,stroke:none,color:#666,font-style:italic
-</details>```
+    Ingestion --- Tracker
+    Preprocessing --- Tracker
+    Features --- Tracker
+    Search --- Tracker
+    Eval --- Tracker
+    Registry --- Tracker
 
-### 2. The Training Pipeline (The "Data Flow")
+    Ingestion --- Logger
+    Preprocessing --- Logger
+    Features --- Logger
+    Search --- Logger
+    Eval --- Logger
+    Registry --- Logger
+
+</details>
+
+---
+
+### 2. The Training Pipeline (Data Flow)
 
 This diagram illustrates the **Worker Pattern** and **Data Flow**. It highlights the "Fail-Fast" principle via **Validation Gates**, ensuring that data integrity is verified at every transition point between Data Engineering and ML Engineering.
 
@@ -105,46 +120,55 @@ This diagram illustrates the **Worker Pattern** and **Data Flow**. It highlights
 
 <details>
 <summary>View Training Pipeline (Mermaid Code)</summary>
- ```mermaid
-graph LR
-    subgraph "Data Engineering"
-        RawData[(Raw Data)] --> Load[Loader]
-        Load --> Val1{Validator}
-        Val1 -- Fail --> Error[RuntimeError]
-        Val1 -- Pass --> Sanitized[Sanitized Data]
-        Sanitized --> Pre[Preprocessor]
-        Pre --> Processed[(Processed Data)]
-    end
 
-    subgraph "Feature Engineering"
-        Processed --> Feat[Feature Engineer]
-        Feat --> Matrix[Feature Matrix]
-        Matrix --> Val2{Validator}
-        Val2 -- Fail --> Error
-        Val2 -- Pass --> Split[Train/Test Split]
-    end
+flowchart TD
 
-    subgraph "Model Engineering (AutoML)"
-        Split --> Search[Search Space Loop]
-        Search --> Train[Model Worker]
-        Train --> Metrics[Metrics Calculation]
-        Metrics --> Eval[Evaluation Logic]
-        Eval --> Champion{Champion Selection}
-    end
+%% Data Engineering
+subgraph DE["Data Engineering"]
+    RawData[(Raw Data)] --> Load[Loader]
+    Load --> Val1{Validator}
+    Val1 -- Fail --> Error[RuntimeError]
+    Val1 -- Pass --> Sanitized[Sanitized Data]
+    Sanitized --> Pre[Preprocessor]
+    Pre --> Processed[(Processed Data)]
+end
 
-    subgraph "Registry & Persistence"
-        Champion -- "Winner" --> Reg[Register Model]
-        Reg --> Store[(Model Store)]
-        Reg --> Tracker[Experiment Tracker]
-    end
+%% Feature Engineering
+subgraph FE["Feature Engineering"]
+    Processed --> Feat[Feature Engineer]
+    Feat --> Matrix[Feature Matrix]
+    Matrix --> Val2{Validator}
+    Val2 -- Fail --> Error
+    Val2 -- Pass --> Split[Train/Test Split]
+end
 
-    style Val1 fill:#f96,stroke:#333
-    style Val2 fill:#f96,stroke:#333
-    style Champion fill:#f96,stroke:#333
-    style Error fill:#ff9999
-</details>```
+%% Model Engineering (AutoML)
+subgraph ME["Model Engineering (AutoML)"]
+    Split --> Search[Search Space Loop]
+    Search --> Train[Model Worker]
+    Train --> Metrics[Metrics Calculation]
+    Metrics --> Eval[Evaluation Logic]
+    Eval --> Champion{Champion Selection}
+end
 
-### 3. The Production Feedback Loop (The "MLOps Cycle")
+%% Registry & Persistence
+subgraph RP["Registry & Persistence"]
+    Champion -- "Winner" --> Reg[Register Model]
+    Reg --> Store[(Model Store)]
+    Reg --> Tracker[Experiment Tracker]
+end
+
+%% Styles
+style Val1 fill:#f96,stroke:#333
+style Val2 fill:#f96,stroke:#333
+style Champion fill:#f96,stroke:#333
+style Error fill:#ff9999
+```
+</details>
+
+---
+
+### 3. The Production Feedback Loop (MLOps Cycle)
 
 This diagram demonstrates the **Observability & Automation** lifecycle. It shows how the system behaves in production, where the **Model Registry** acts as the "Single Source of Truth" to trigger automated retraining based on live drift signals.
 
@@ -152,21 +176,24 @@ This diagram demonstrates the **Observability & Automation** lifecycle. It shows
 
 <details>
 <summary>View Production Feedback Loop (Mermaid Code)</summary>
- ```mermaid
+
 graph TD
-    subgraph "Production Environment"
+    %% Production Environment
+    subgraph PROD["Production Environment"]
         LiveData[(Live Data)] --> API[Inference API]
         API --> Prediction[Prediction]
         Prediction --> Monitor[Monitoring Service]
     end
 
-    subgraph "Observability & Governance"
-        Monitor --> Drift{Drift/Error?}
+    %% Observability & Governance
+    subgraph OBS["Observability & Governance"]
+        Monitor --> Drift{Drift / Error?}
         Drift -- No --> Prediction
         Drift -- Yes --> Alert[Alert / Trigger]
     end
 
-    subgraph "Automated Retraining"
+    %% Automated Retraining
+    subgraph AUTO["Automated Retraining"]
         Alert --> RetrainPipe[Retrain Pipeline]
         RetrainPipe --> TrainPipe[Training Pipeline]
         TrainPipe --> Registry[Model Registry]
@@ -176,7 +203,9 @@ graph TD
     style Drift fill:#f96,stroke:#333
     style Alert fill:#ff9999
     style Registry fill:#bbf,stroke:#333
-</details>```
+
+</details>
+
 
 ### 🔑 Key Architectural Notes
 
