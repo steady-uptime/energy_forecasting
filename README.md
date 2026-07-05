@@ -19,32 +19,173 @@ To ensure production readiness, the system strictly adheres to five architectura
 
 ---
 
-## 🏗 System Architecture
+## 🏗 System Architecture & Blueprints
 
-The system is organized into five distinct layers to separate concerns:
+The system is organized into five distinct layers to separate concerns, moving beyond a simple script to a **Service-Oriented Architecture (SOA)**.
 
-### A. Data & Configuration Layer
-*   **Config Module:** Centralized YAML configuration management.
-*   **Data Access Module:** Abstracted data repository (supports local, SQL, and Cloud storage).
+### 1. High-Level System Architecture (The "Layers")
 
-### B. Core ML Lifecycle (Service-Oriented)
-Each phase is a discrete service with clear input/output contracts:
-*   **Ingestion $\rightarrow$ Preprocessing $\rightarrow$ Feature Engineering $\rightarrow$ Model Search $\rightarrow$ Evaluation $\rightarrow$ Registry**
+This diagram represents the **System Topology**. It separates the "Core" (ML Logic) from the "Infra" (Utilities) and "Orchestration" (Execution), ensuring that the ML logic is decoupled from the underlying infrastructure.
 
-### C. Orchestration Layer
-Pipelines are defined as **Code-as-DAGs**. Instead of notebooks, the system uses Python scripts to orchestrate service execution:
-*   `train_pipeline.py`: The primary production training flow.
-*   `retrain_pipeline.py`: Triggered by drift signals.
-*   `backfill_pipeline.py`: Handles historical data updates.
+![System Topology](./assets/diagrams/architecture.png)
 
-### D. Serving & Interface Layer
-*   **FastAPI Inference API:** Endpoints for `/predict` and `/model_metadata`.
-*   **CLI Tools:** Command-line interface for manual pipeline execution and champion selection.
+<details>
+<summary>View Architecture Logic (Mermaid Code)</summary>
+ ```mermaid
+graph TD
+    subgraph "User Interface / Entry Points"
+        CLI[CLI Tools]
+        API[FastAPI Inference]
+    end
 
-### E. Observability & Governance
-*   **Experiment Tracking:** Automated logging of hyperparameters and metrics.
-*   **Data Validation Gatekeepers:** Strict schema validation between every pipeline stage.
-*   **Model Cards:** Auto-generated documentation for every registered model.
+    subgraph "Orchestration Layer"
+        Path1[pipelines/]
+        TrainPipe[Train Pipeline]
+        RetrainPipe[Retrain Pipeline]
+        MonitorPipe[Monitor Pipeline]
+    end
+
+    subgraph "Core ML Logic"
+        Path2[src/core/]
+        Ingestion[Ingestion Service]
+        Preprocessing[Preprocessing Service]
+        Features[Feature Engineering]
+        Search[Model Search / AutoML]
+        Eval[Evaluation Service]
+        Registry[Model Registry]
+    end
+
+    subgraph "Infrastructure Layer"
+        Path3[src/infra/]
+        Storage[Model Store / Data Repo]
+        Tracker[Experiment Tracker]
+        Logger[Structured Logger]
+        Secrets[Secrets Management]
+    end
+
+    subgraph "Configuration Layer"
+        Path4[configs/]
+        Config[YAML Configs]
+    end
+
+    %% Flow logic
+    Config -.-> TrainPipe
+    Config -.-> Registry
+    
+    TrainPipe --> Ingestion
+    Ingestion --> Preprocessing
+    Preprocessing --> Features
+    Features --> Search
+    Search --> Eval
+    Eval --> Registry
+    
+    Registry --> API
+    API --> Prediction[Prediction]
+    Prediction --> MonitorPipe
+    MonitorPipe -- "Drift Detected" --> RetrainPipe
+    RetrainPipe --> TrainPipe
+
+    %% Infra Connections
+    Ingestion & Preprocessing & Features & Search & Eval & Registry --- Storage
+    Ingestion & Preprocessing & Features & Search & Eval & Registry --- Tracker
+    Ingestion & Preprocessing & Features & Search & Eval & Registry --- Logger
+
+    %% Styling to make folder paths look like labels (optional)
+    style Path1 fill:none,stroke:none,color:#666,font-style:italic
+    style Path2 fill:none,stroke:none,color:#666,font-style:italic
+    style Path3 fill:none,stroke:none,color:#666,font-style:italic
+    style Path4 fill:none,stroke:none,color:#666,font-style:italic
+</details>```
+
+### 2. The Training Pipeline (The "Data Flow")
+
+This diagram illustrates the **Worker Pattern** and **Data Flow**. It highlights the "Fail-Fast" principle via **Validation Gates**, ensuring that data integrity is verified at every transition point between Data Engineering and ML Engineering.
+
+![System Topology](./assets/diagrams/ml-data-flow.png)
+
+<details>
+<summary>View Training Pipeline (Mermaid Code)</summary>
+ ```mermaid
+graph LR
+    subgraph "Data Engineering"
+        RawData[(Raw Data)] --> Load[Loader]
+        Load --> Val1{Validator}
+        Val1 -- Fail --> Error[RuntimeError]
+        Val1 -- Pass --> Sanitized[Sanitized Data]
+        Sanitized --> Pre[Preprocessor]
+        Pre --> Processed[(Processed Data)]
+    end
+
+    subgraph "Feature Engineering"
+        Processed --> Feat[Feature Engineer]
+        Feat --> Matrix[Feature Matrix]
+        Matrix --> Val2{Validator}
+        Val2 -- Fail --> Error
+        Val2 -- Pass --> Split[Train/Test Split]
+    end
+
+    subgraph "Model Engineering (AutoML)"
+        Split --> Search[Search Space Loop]
+        Search --> Train[Model Worker]
+        Train --> Metrics[Metrics Calculation]
+        Metrics --> Eval[Evaluation Logic]
+        Eval --> Champion{Champion Selection}
+    end
+
+    subgraph "Registry & Persistence"
+        Champion -- "Winner" --> Reg[Register Model]
+        Reg --> Store[(Model Store)]
+        Reg --> Tracker[Experiment Tracker]
+    end
+
+    style Val1 fill:#f96,stroke:#333
+    style Val2 fill:#f96,stroke:#333
+    style Champion fill:#f96,stroke:#333
+    style Error fill:#ff9999
+</details>```
+
+### 3. The Production Feedback Loop (The "MLOps Cycle")
+
+This diagram demonstrates the **Observability & Automation** lifecycle. It shows how the system behaves in production, where the **Model Registry** acts as the "Single Source of Truth" to trigger automated retraining based on live drift signals.
+
+![System Topology](./assets/diagrams/feedback-loop.png)
+
+<details>
+<summary>View Production Feedback Loop (Mermaid Code)</summary>
+ ```mermaid
+graph TD
+    subgraph "Production Environment"
+        LiveData[(Live Data)] --> API[Inference API]
+        API --> Prediction[Prediction]
+        Prediction --> Monitor[Monitoring Service]
+    end
+
+    subgraph "Observability & Governance"
+        Monitor --> Drift{Drift/Error?}
+        Drift -- No --> Prediction
+        Drift -- Yes --> Alert[Alert / Trigger]
+    end
+
+    subgraph "Automated Retraining"
+        Alert --> RetrainPipe[Retrain Pipeline]
+        RetrainPipe --> TrainPipe[Training Pipeline]
+        TrainPipe --> Registry[Model Registry]
+        Registry -- "Update Champion" --> API
+    end
+
+    style Drift fill:#f96,stroke:#333
+    style Alert fill:#ff9999
+    style Registry fill:#bbf,stroke:#333
+</details>```
+
+### 🔑 Key Architectural Notes
+
+- **The Registry as the Heart:** Notice in Diagrams 1 and 3, the **Registry** is the central hub. It is the **Single Source of Truth** for what the API should use. The API never looks at the raw Model Store directly; it only asks the Registry for the current "Champion."
+- **Validation Gates:** In Diagram 2, the highlighted **Validators** are your primary tool for enforcing **Data Contracts**. This prevents "silent failures" where corrupted data propagates downstream.
+- **Decoupled Search:** The **Model Search** block is isolated. This allows you to swap a Random Search for Bayesian Optimization or a Genetic Algorithm just by changing the `search_space.yaml` without modifying the core `train_pipeline.py`.
+- **The "Worker" Pattern:** The **Model Worker** is a clean abstraction. The Orchestrator doesn't care _how_ the model trains; it only knows that it takes a Feature Matrix and returns a standardized Model object.
+
+
 
 ---
 
