@@ -284,8 +284,9 @@ graph TD
 ```
 
 ⚖️ Legal & Compliance
-```text
-This project uses the Electricity Load Diagrams 2011–2014 dataset, sourced from the UCI Machine Learning Repository. The data is licensed under CC BY 4.0. All modifications to the data are for educational and portfolio purposes only.
-```
+This project uses the Electricity Load Diagrams 2011–2014 dataset 
+Sourced from the UCI Machine Learning Repository
+The data is licensed under CC BY 4.0. 
+All modifications to the data are for educational and portfolio purposes only.
 
 _Note: The pipeline includes a DataValidator gatekeeper to ensure the input data conforms to the expected schema before processing, ensuring robustness against data drift or schema changes._
