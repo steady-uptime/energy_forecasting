@@ -1,28 +1,86 @@
-# Modular AutoML Energy Forecasting System
+Absolutely, Brian — here is a **fully rewritten, production‑grade GitHub README**, formatted in clean GitHub Markdown, aligned with your architecture, and updated to reflect everything we completed today.
 
-![Python](https://img.shields.io/badge/python-3.9+-blue)
-![MLOps](https://img.shields.io/badge/MLOps-Production_Grade-orange)
-![Architecture](https://img.shields.io/badge/Architecture-Service_Oriented-green)
-
-## 🚀 Project Overview
-This project is a production-grade, configuration-driven MLOps framework designed for energy-consumption forecasting. Unlike standard ML scripts, this system treats Machine Learning as a set of **decoupled, modular services**. 
-
-The goal is to solve the "Hidden Technical Debt in ML Systems" by enforcing strict engineering principles: **reproducibility, testability, and portability.**
-
-### 🎯 Core Engineering Laws
-To ensure production readiness, the system strictly adheres to five architectural laws:
-1.  **Zero Hardcoding:** No absolute paths; all paths are resolved dynamically via a central configuration loader.
-2.  **Config-Driven Architecture:** All hyperparameters, file paths, and feature schemas reside in `.yaml` files.
-3.  **Portability First:** Designed to run on any machine by using `pathlib` for cross-platform compatibility.
-4.  **Decoupled Logic:** Complete separation of Data Engineering, Model Engineering, and Orchestration.
-5.  **Singleton Config:** A single source of truth for the project root and global settings, ensuring consistency across all modules.
+This version is polished, senior‑level, and ready to paste directly into your repo.
 
 ---
 
-## 🏗 System Architecture & Blueprints
+# **Modular AutoML Energy Forecasting System**
 
-The system is organized into five distinct layers to separate concerns, moving beyond a simple script to a **Service-Oriented Architecture (SOA)**.
+`https://img.shields.io/badge/python-3.9+-blue`
+`https://img.shields.io/badge/MLOps-Production_Grade-orange`
+`https://img.shields.io/badge/Architecture-Service_Oriented-green`
 
+A fully modular, configuration‑driven MLOps framework for **energy‑consumption forecasting**, built around strict engineering laws that eliminate hidden technical debt and enforce reproducibility, portability, and maintainability.
+
+This project treats Machine Learning as a **software system**, not a script — using a service‑oriented architecture, dependency injection, validation gates, metadata tracking, and a versioned model registry.
+
+---
+
+## **🚀 Project Overview**
+
+This system is designed to solve real‑world ML engineering problems:
+
+- brittle pipelines  
+- hidden coupling  
+- silent data failures  
+- unreproducible training  
+- unversioned models  
+- unclear orchestration  
+
+The solution is a **clean, layered architecture** with:
+
+- deterministic artifact paths  
+- strict data contracts  
+- versioned model registry  
+- pipeline metadata tracking  
+- config snapshotting  
+- modular services  
+- a dedicated training orchestrator  
+
+---
+
+## **🎯 Core Engineering Laws**
+
+The entire project adheres to five architectural laws:
+
+1. **Zero Hardcoding**  
+   All paths, hyperparameters, schemas, and settings come from YAML config files.
+
+2. **Config‑Driven Architecture**  
+   A singleton config loader provides a consistent, environment‑aware configuration object.
+
+3. **Portability First**  
+   All paths use `pathlib` and resolve relative to the project root.
+
+4. **Decoupled Logic**  
+   Data engineering, model engineering, and orchestration are isolated into independent services.
+
+5. **Dependency Injection Everywhere**  
+   The orchestrator receives all services explicitly — no hidden state, no global objects.
+
+---
+
+## **🏗 System Architecture**
+
+The project is organized into five layers:
+
+```
+┌──────────────────────────────┐
+│        Pipeline Layer        │  ← train_pipeline.py (entrypoint)
+└──────────────────────────────┘
+┌──────────────────────────────┐
+│       Orchestration Layer    │  ← TrainingOrchestrator
+└──────────────────────────────┘
+┌──────────────────────────────┐
+│         Service Layer        │  ← ingestion, preprocessing, engineering, splitting, modeling, evaluation
+└──────────────────────────────┘
+┌──────────────────────────────┐
+│     Infrastructure Layer     │  ← artifact manager, repository, logging
+└──────────────────────────────┘
+┌──────────────────────────────┐
+│        Configuration Layer   │  ← YAML configs + singleton loader
+└──────────────────────────────┘
+```
 ### 1. High‑Level System Architecture (Layers)
 
 This diagram represents the **System Topology**. It separates the "Core" (ML Logic) from the "Infra" (Utilities) and "Orchestration" (Execution), ensuring that the ML logic is decoupled from the underlying infrastructure.
@@ -202,91 +260,113 @@ graph TD
 
 </details>
 
+### **Key Architectural Highlights**
 
-### 🔑 Key Architectural Notes
+- **Registry as the Source of Truth**  
+  The inference API will load the *champion model* exclusively from the registry.
 
-- **The Registry as the Heart:** Notice in Diagrams 1 and 3, the **Registry** is the central hub. It is the **Single Source of Truth** for what the API should use. The API never looks at the raw Model Store directly; it only asks the Registry for the current "Champion."
-- **Validation Gates:** In Diagram 2, the highlighted **Validators** are your primary tool for enforcing **Data Contracts**. This prevents "silent failures" where corrupted data propagates downstream.
-- **Decoupled Search:** The **Model Search** block is isolated. This allows you to swap a Random Search for Bayesian Optimization or a Genetic Algorithm just by changing the `search_space.yaml` without modifying the core `train_pipeline.py`.
-- **The "Worker" Pattern:** The **Model Worker** is a clean abstraction. The Orchestrator doesn't care _how_ the model trains; it only knows that it takes a Feature Matrix and returns a standardized Model object.
+- **Validation Gates**  
+  Every pipeline stage enforces a schema contract to prevent silent data corruption.
 
+- **Worker Pattern**  
+  The orchestrator does not train models directly — it delegates to a Model Worker.
 
-
----
-
-## 🛠 Tech Stack
-*   **Language:** Python (Type Hinted)
-*   **Orchestration:** Custom Pipeline Orchestrator (Modular Service Pattern)
-*   **Data Handling:** Pandas, NumPy, Pathlib
-*   **ML Frameworks:** Scikit-Learn (Random Forest, etc.)
-*   **Logging:** Loguru (Structured logging)
-*   **Configuration:** PyYAML, Dataclasses
-*   **API:** FastAPI (Planned)
-*   **Deployment:** Docker (Planned)
+- **Deterministic Metadata**  
+  Every pipeline run produces a metadata file containing timestamps, durations, artifact paths, and registry version.
 
 ---
 
-## 📈 Project Milestones & Roadmap
+## **🛠 Tech Stack**
 
-### ✅ Completed Milestones
-- [x] **Singleton Configuration Loader:** Implemented a type-safe, environment-aware config loader using Dataclasses.
-- [x] **Service-Oriented Architecture:** Built standalone services for Ingestion, Preprocessing, and Feature Engineering.
-- [x] **Data Validation Gatekeepers:** Implemented `DataValidator` to enforce schema contracts between pipeline stages (Raw $\rightarrow$ Sanitized $\rightarrow$ Engineered).
-- [x] **Model Worker Factory:** Implemented the Factory Pattern to decouple the orchestrator from specific model implementations (e.g., Random Forest).
-- [x] **Train Pipeline:** A fully functional `train_pipeline.py` that executes the end-to-end flow from raw CSV to saved model and metrics.
-- [x] **Structured Logging:** Integrated `loguru` with `run_id` tracking for easy debugging in production.
-
-### 🏗 In Progress / Planned
-- [ ] **Model Registry:** A persistent storage system to version models, tags, and metadata.
-- [ ] **Monitoring Service:** Implementation of drift detection signals to trigger retraining.
-- [ ] **Retrain Pipeline:** Automated DAG for model updating based on production performance.
-- [ ] **FastAPI Deployment:** Wrapping the model loader in a production-ready REST API.
-- [ ] **Dockerization:** Multi-stage Docker builds for consistent environment deployment.
+- **Language:** Python 3.9+  
+- **ML Framework:** Scikit‑Learn  
+- **Orchestration:** Custom Training Orchestrator  
+- **Logging:** Loguru  
+- **Configuration:** YAML + Dataclasses  
+- **Data Handling:** Pandas, NumPy  
+- **API (Planned):** FastAPI  
+- **Deployment (Planned):** Docker  
 
 ---
 
-## 💻 Getting Started
+## **📈 Project Milestones & Roadmap**
 
-### Prerequisites
-*   Python 3.9+
-*   Virtual Environment (`venv` or `conda`)
+### **✅ Completed**
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/energy-forecasting-mlops.git
-   cd energy-forecasting-mlops
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run the training pipeline:
-   ```bash
-   python -m pipelines.train_pipeline
-   ```
+- [x] Singleton configuration loader  
+- [x] Service‑oriented architecture  
+- [x] Data validation contracts  
+- [x] Model Worker Factory  
+- [x] Modular training pipeline  
+- [x] Structured logging with run_id  
+- [x] **Training Orchestrator** (new)  
+- [x] **Pipeline Metadata System** (new)  
+- [x] **Config Snapshotting** (new)  
+- [x] **Model Registry with versioning + champion pointer** (new)  
+
+### **🧭 In Progress / Planned**
+
+- [ ] Drift monitoring service  
+- [ ] Automated retraining pipeline  
+- [ ] FastAPI deployment  
+- [ ] Dockerization  
+- [ ] Model comparison engine  
 
 ---
 
-## 📂 Directory Structure
-```text
+## **💻 Getting Started**
+
+### **Prerequisites**
+
+- Python 3.9+  
+- Virtual environment (`venv` recommended)
+
+### **Installation**
+
+```bash
+git clone https://github.com/steady-uptime/energy_forecasting
+cd energy_forecasting
+pip install -r requirements.txt
+```
+
+### **Run the Training Pipeline**
+
+```bash
+python -m pipelines.train_pipeline
+```
+
+This will:
+
+- ingest raw data  
+- preprocess  
+- engineer features  
+- split  
+- train  
+- evaluate  
+- register the model  
+- generate metadata  
+- snapshot the config  
+
+---
+
+## **📂 Directory Structure**
+
+```
 .
 ├── configs/                # YAML configuration files
-├── data/                   # Raw, processed, and interim data
+├── data/                   # Raw, processed, engineered data
 ├── logs/                   # Structured pipeline logs
-├── models/                 # Saved model artifacts
-├── pipelines/             # Pipeline Orchestrators (DAGs)
-├── src/                   # Core Logic
-│   ├── core/              # Configuration, Services, Validation
-│   ├── infra/             # Logging, Artifact Management, Repositories
-│   └── utils/             # Helper functions
+├── artifacts/              # Models, metrics, registry, metadata
+├── pipelines/              # Pipeline entrypoints (train, retrain, etc.)
+├── src/
+│   ├── core/               # Orchestrator, services, registry, metadata
+│   ├── infra/              # Artifact manager, repository, logging
+│   └── utils/              # Helpers
 └── requirements.txt
 ```
 
-⚖️ Legal & Compliance
-This project uses the Electricity Load Diagrams 2011–2014 dataset 
-Sourced from the UCI Machine Learning Repository
-The data is licensed under CC BY 4.0. 
-All modifications to the data are for educational and portfolio purposes only.
+---
 
-_Note: The pipeline includes a DataValidator gatekeeper to ensure the input data conforms to the expected schema before processing, ensuring robustness against data drift or schema changes._
+## **⚖️ Legal & Compliance**
+
+This project uses the **Electricity Load Diagrams 2011–2014** dataset from the UCI Machine Learning Repository, licensed under **CC BY 4.0**.
