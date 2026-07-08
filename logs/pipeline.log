@@ -1,198 +1,762 @@
-2026-07-04 16:08:03.564 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
-2026-07-04 16:08:03.565 | INFO     | __main__:main:22 - Configuration loaded successfully.
-2026-07-04 16:08:03.565 | INFO     | __main__:main:36 - --- Starting Pipeline: Data Engineering Phase ---
-2026-07-04 16:08:03.584 | DEBUG    | src.infra.data_repository:read_csv:65 - Resolved 370 dtypes from schema patterns.
-2026-07-04 16:08:11.336 | INFO     | src.core.ingestion_service:load_raw_energy_data:36 - Ingestion successful. Final shape: (140256, 371)
-2026-07-04 16:08:11.336 | INFO     | __main__:main:47 - Validating Raw Data Contract...
-2026-07-04 16:08:11.337 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 20:39:32.768 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 20:39:32.769 | INFO     | __main__:main:24 - System Bootstrapping...
+2026-07-07 20:39:32.769 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 20:39:32.769 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 20:39:32.770 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 20:39:32.770 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 20:39:32.770 | INFO     | src.core.train_orchestrator:run:188 - Configuration loaded successfully.
+2026-07-07 20:39:32.770 | INFO     | src.core.train_orchestrator:run:189 - Pipeline started
+2026-07-07 20:39:32.770 | INFO     | src.core.train_orchestrator:_phase_ingestion:70 - Loading raw data
+2026-07-07 20:39:32.770 | INFO     | src.core.train_orchestrator:_phase_ingestion:73 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 20:39:32.771 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 20:39:32.771 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 20:39:32.798 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 20:39:39.813 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 20:39:40.463 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 20:39:40.464 | INFO     | src.core.train_orchestrator:_phase_ingestion:78 - Validating Raw Data Contract...
+2026-07-07 20:39:40.464 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
-2026-07-04 16:08:11.337 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 16:08:11.343 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 16:08:11.344 | INFO     | src.core.preprocessing_service:__init__:24 - DataPreprocessor initialized. Target: C:\mlops\projects\energy_forecasting\data\processed
-2026-07-04 16:08:11.472 | INFO     | src.core.preprocessing_service:clean_data:28 - Starting data cleaning (Sanitization) phase...
-2026-07-04 16:08:11.473 | DEBUG    | src.core.preprocessing_service:clean_data:35 - Dropped columns: []
-2026-07-04 16:08:36.240 | DEBUG    | src.core.preprocessing_service:clean_data:43 - Converted MT_* columns to numeric.
-2026-07-04 16:08:36.368 | DEBUG    | src.core.preprocessing_service:clean_data:53 - Applied frequency conversion factor 0.25 to MT_* columns.
-2026-07-04 16:08:36.549 | DEBUG    | src.core.preprocessing_service:clean_data:77 - Applied imputation strategy: forward_fill
-2026-07-04 16:08:36.550 | INFO     | __main__:main:59 - Validating Preprocessed Data Contract...
-2026-07-04 16:08:36.550 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 20:39:40.465 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 20:39:40.473 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 20:39:40.474 | INFO     | src.core.train_orchestrator:_phase_preprocessing:88 - Preprocessing started...
+2026-07-07 20:39:40.474 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 20:39:40.618 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 20:40:04.941 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 20:40:05.061 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 20:40:05.251 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 20:40:05.251 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 20:40:05.251 | INFO     | src.core.train_orchestrator:_phase_preprocessing:94 - Validating Preprocessed Data Contract...
+2026-07-07 20:40:05.252 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 16:08:36.550 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 16:08:36.558 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 16:08:37.138 | DEBUG    | src.core.feature_engineering:transform:33 - Created total_load from 370 MT_* columns.
-2026-07-04 16:08:37.159 | DEBUG    | src.core.feature_engineering:transform:49 - Created time-based engineered features.
-2026-07-04 16:08:37.160 | INFO     | __main__:main:71 - Validating Engineered Data Contract...
-2026-07-04 16:08:37.161 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 20:40:05.252 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 20:40:05.259 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 20:40:05.260 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:107 - Feature Engineering started...
+2026-07-07 20:40:05.260 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 20:40:05.865 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 20:40:05.884 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 20:40:05.885 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 20:40:05.886 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:111 - Validating Engineered Data Contract...
+2026-07-07 20:40:05.886 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 16:08:37.161 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 16:08:37.169 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 16:08:58.159 | INFO     | src.core.preprocessing_service:save_processed_data:85 - Successfully saved sanitized data to: C:\mlops\projects\energy_forecasting\data\processed\cleaned_data.csv
-2026-07-04 16:08:58.263 | INFO     | src.core.splitter_service:split:48 - Split complete. X_train shape: (105120, 373). Features: ['MT_001', 'MT_002', 'MT_003', 'MT_004', 'MT_005', 'MT_006', 'MT_007', 'MT_008', 'MT_009', 'MT_010', 'MT_011', 'MT_012', 'MT_013', 'MT_014', 'MT_015', 'MT_016', 'MT_017', 'MT_018', 'MT_019', 'MT_020', 'MT_021', 'MT_022', 'MT_023', 'MT_024', 'MT_025', 'MT_026', 'MT_027', 'MT_028', 'MT_029', 'MT_030', 'MT_031', 'MT_032', 'MT_033', 'MT_034', 'MT_035', 'MT_036', 'MT_037', 'MT_038', 'MT_039', 'MT_040', 'MT_041', 'MT_042', 'MT_043', 'MT_044', 'MT_045', 'MT_046', 'MT_047', 'MT_048', 'MT_049', 'MT_050', 'MT_051', 'MT_052', 'MT_053', 'MT_054', 'MT_055', 'MT_056', 'MT_057', 'MT_058', 'MT_059', 'MT_060', 'MT_061', 'MT_062', 'MT_063', 'MT_064', 'MT_065', 'MT_066', 'MT_067', 'MT_068', 'MT_069', 'MT_070', 'MT_071', 'MT_072', 'MT_073', 'MT_074', 'MT_075', 'MT_076', 'MT_077', 'MT_078', 'MT_079', 'MT_080', 'MT_081', 'MT_082', 'MT_083', 'MT_084', 'MT_085', 'MT_086', 'MT_087', 'MT_088', 'MT_089', 'MT_090', 'MT_091', 'MT_092', 'MT_093', 'MT_094', 'MT_095', 'MT_096', 'MT_097', 'MT_098', 'MT_099', 'MT_100', 'MT_101', 'MT_102', 'MT_103', 'MT_104', 'MT_105', 'MT_106', 'MT_107', 'MT_108', 'MT_109', 'MT_110', 'MT_111', 'MT_112', 'MT_113', 'MT_114', 'MT_115', 'MT_116', 'MT_117', 'MT_118', 'MT_119', 'MT_120', 'MT_121', 'MT_122', 'MT_123', 'MT_124', 'MT_125', 'MT_126', 'MT_127', 'MT_128', 'MT_129', 'MT_130', 'MT_131', 'MT_132', 'MT_133', 'MT_134', 'MT_135', 'MT_136', 'MT_137', 'MT_138', 'MT_139', 'MT_140', 'MT_141', 'MT_142', 'MT_143', 'MT_144', 'MT_145', 'MT_146', 'MT_147', 'MT_148', 'MT_149', 'MT_150', 'MT_151', 'MT_152', 'MT_153', 'MT_154', 'MT_155', 'MT_156', 'MT_157', 'MT_158', 'MT_159', 'MT_160', 'MT_161', 'MT_162', 'MT_163', 'MT_164', 'MT_165', 'MT_166', 'MT_167', 'MT_168', 'MT_169', 'MT_170', 'MT_171', 'MT_172', 'MT_173', 'MT_174', 'MT_175', 'MT_176', 'MT_177', 'MT_178', 'MT_179', 'MT_180', 'MT_181', 'MT_182', 'MT_183', 'MT_184', 'MT_185', 'MT_186', 'MT_187', 'MT_188', 'MT_189', 'MT_190', 'MT_191', 'MT_192', 'MT_193', 'MT_194', 'MT_195', 'MT_196', 'MT_197', 'MT_198', 'MT_199', 'MT_200', 'MT_201', 'MT_202', 'MT_203', 'MT_204', 'MT_205', 'MT_206', 'MT_207', 'MT_208', 'MT_209', 'MT_210', 'MT_211', 'MT_212', 'MT_213', 'MT_214', 'MT_215', 'MT_216', 'MT_217', 'MT_218', 'MT_219', 'MT_220', 'MT_221', 'MT_222', 'MT_223', 'MT_224', 'MT_225', 'MT_226', 'MT_227', 'MT_228', 'MT_229', 'MT_230', 'MT_231', 'MT_232', 'MT_233', 'MT_234', 'MT_235', 'MT_236', 'MT_237', 'MT_238', 'MT_239', 'MT_240', 'MT_241', 'MT_242', 'MT_243', 'MT_244', 'MT_245', 'MT_246', 'MT_247', 'MT_248', 'MT_249', 'MT_250', 'MT_251', 'MT_252', 'MT_253', 'MT_254', 'MT_255', 'MT_256', 'MT_257', 'MT_258', 'MT_259', 'MT_260', 'MT_261', 'MT_262', 'MT_263', 'MT_264', 'MT_265', 'MT_266', 'MT_267', 'MT_268', 'MT_269', 'MT_270', 'MT_271', 'MT_272', 'MT_273', 'MT_274', 'MT_275', 'MT_276', 'MT_277', 'MT_278', 'MT_279', 'MT_280', 'MT_281', 'MT_282', 'MT_283', 'MT_284', 'MT_285', 'MT_286', 'MT_287', 'MT_288', 'MT_289', 'MT_290', 'MT_291', 'MT_292', 'MT_293', 'MT_294', 'MT_295', 'MT_296', 'MT_297', 'MT_298', 'MT_299', 'MT_300', 'MT_301', 'MT_302', 'MT_303', 'MT_304', 'MT_305', 'MT_306', 'MT_307', 'MT_308', 'MT_309', 'MT_310', 'MT_311', 'MT_312', 'MT_313', 'MT_314', 'MT_315', 'MT_316', 'MT_317', 'MT_318', 'MT_319', 'MT_320', 'MT_321', 'MT_322', 'MT_323', 'MT_324', 'MT_325', 'MT_326', 'MT_327', 'MT_328', 'MT_329', 'MT_330', 'MT_331', 'MT_332', 'MT_333', 'MT_334', 'MT_335', 'MT_336', 'MT_337', 'MT_338', 'MT_339', 'MT_340', 'MT_341', 'MT_342', 'MT_343', 'MT_344', 'MT_345', 'MT_346', 'MT_347', 'MT_348', 'MT_349', 'MT_350', 'MT_351', 'MT_352', 'MT_353', 'MT_354', 'MT_355', 'MT_356', 'MT_357', 'MT_358', 'MT_359', 'MT_360', 'MT_361', 'MT_362', 'MT_363', 'MT_364', 'MT_365', 'MT_366', 'MT_367', 'MT_368', 'MT_369', 'MT_370', 'hour_of_day', 'day_of_week', 'is_weekend']
-2026-07-04 16:08:58.267 | INFO     | __main__:main:90 - --- Starting Model Engineering Phase ---
-2026-07-04 16:08:58.269 | INFO     | src.infra.artifact_manager:__init__:30 - ArtifactManager initialized. Project Root: C:\mlops\projects\energy_forecasting
-2026-07-04 16:08:58.269 | INFO     | src.core.modeling:get_worker:60 - Factory instantiating worker for: random_forest_regressor
-2026-07-04 16:08:58.269 | INFO     | src.core.modeling:train:32 - Training RandomForestRegressor model...
-2026-07-04 16:09:15.524 | INFO     | src.infra.artifact_manager:save_model:38 - Model artifact saved to: artifacts\models\Energy_Forecast_RF_Regressor.joblib
-2026-07-04 16:09:15.525 | INFO     | __main__:main:110 - --- Starting Evaluation Phase ---
-2026-07-04 16:09:15.525 | INFO     | src.core.evaluator:evaluate:9 - Evaluating model performance...
-2026-07-04 16:09:15.580 | INFO     | src.core.evaluator:evaluate:17 - Evaluation complete. Metrics: {'rmse': 2630.757976362563, 'mse': 6920887.530195248}
-2026-07-04 16:09:15.582 | INFO     | src.infra.artifact_manager:save_metrics:68 - Metrics artifact saved to: artifacts\metadata\Energy_Forecast_RF_Regressor_metrics.json
-2026-07-04 16:09:15.582 | SUCCESS  | __main__:main:124 - Pipeline executed successfully.
-2026-07-04 17:47:45.862 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
-2026-07-04 17:47:45.862 | INFO     | __main__:main:22 - Configuration loaded successfully.
-2026-07-04 17:47:45.862 | INFO     | __main__:main:36 - --- Starting Pipeline: Data Engineering Phase ---
-2026-07-04 17:47:45.887 | DEBUG    | src.infra.data_repository:read_csv:65 - Resolved 370 dtypes from schema patterns.
-2026-07-04 17:47:53.515 | INFO     | src.core.ingestion_service:load_raw_energy_data:36 - Ingestion successful. Final shape: (140256, 371)
-2026-07-04 17:47:53.515 | INFO     | __main__:main:47 - Validating Raw Data Contract...
-2026-07-04 17:47:53.515 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 20:40:05.886 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 20:40:05.894 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 20:40:05.894 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:114 - Saving Processed data...
+2026-07-07 20:40:25.521 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 20:40:25.521 | INFO     | src.core.train_orchestrator:_phase_splitting:129 - Data Splitter - Time Series - started...
+2026-07-07 20:40:25.521 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 20:40:25.523 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 20:40:25.620 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 20:40:25.621 | INFO     | src.core.train_orchestrator:_phase_modeling:148 - --- Starting Model Engineering Phase ---
+2026-07-07 20:40:25.621 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 20:40:25.622 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 20:40:25.622 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 20:40:39.224 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 20:40:39.224 | INFO     | src.core.train_orchestrator:_phase_modeling:153 - Saving Model
+2026-07-07 20:40:39.248 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 20:40:39.248 | INFO     | src.core.train_orchestrator:_phase_evaluation:166 - --- Starting Evaluation Phase ---
+2026-07-07 20:40:39.248 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 20:40:39.298 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 20:40:39.298 | INFO     | src.core.train_orchestrator:_phase_evaluation:170 - Saving Model Metrics
+2026-07-07 20:40:39.299 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 20:40:39.299 | INFO     | src.core.train_orchestrator:run:218 - Pipeline executed successfully.
+2026-07-07 20:40:39.300 | ERROR    | __main__:main:73 - Unexpected System Failure
+Traceback (most recent call last):
+
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+
+  File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 77, in <module>
+    main()
+    └ <function main at 0x0000020952DD3920>
+
+> File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 67, in main
+    orchestrator.run()
+    │            └ <function TrainingOrchestrator.run at 0x000002097456DB20>
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x000002097457C050>
+
+  File "C:\mlops\projects\energy_forecasting\src\core\train_orchestrator.py", line 229, in run
+    metadata.ended_at = datetime.now(datetime.UTC)
+    │        │          │        │   └ <class 'datetime.datetime'>
+    │        │          │        └ <method 'now' of 'datetime.datetime' objects>
+    │        │          └ <class 'datetime.datetime'>
+    │        └ None
+    └ PipelineRunMetadata(run_id='d40125f2a4c34de6b4b8b28d15e5e477', pipeline_name='train_pipeline', status='RUNNING', started_at=d...
+
+AttributeError: type object 'datetime.datetime' has no attribute 'UTC'
+2026-07-07 20:41:31.202 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 20:41:31.202 | INFO     | __main__:main:24 - System Bootstrapping...
+2026-07-07 20:41:31.203 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 20:41:31.203 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 20:41:31.203 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 20:41:31.203 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 20:41:31.204 | INFO     | src.core.train_orchestrator:run:188 - Configuration loaded successfully.
+2026-07-07 20:41:31.204 | INFO     | src.core.train_orchestrator:run:189 - Pipeline started
+2026-07-07 20:41:31.204 | INFO     | src.core.train_orchestrator:_phase_ingestion:70 - Loading raw data
+2026-07-07 20:41:31.204 | INFO     | src.core.train_orchestrator:_phase_ingestion:73 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 20:41:31.204 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 20:41:31.205 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 20:41:31.223 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 20:41:38.305 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 20:41:38.967 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 20:41:38.967 | INFO     | src.core.train_orchestrator:_phase_ingestion:78 - Validating Raw Data Contract...
+2026-07-07 20:41:38.967 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
-2026-07-04 17:47:53.515 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 17:47:53.522 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 17:47:53.522 | INFO     | src.core.preprocessing_service:__init__:24 - DataPreprocessor initialized. Target: C:\mlops\projects\energy_forecasting\data\processed
-2026-07-04 17:47:53.651 | INFO     | src.core.preprocessing_service:clean_data:28 - Starting data cleaning (Sanitization) phase...
-2026-07-04 17:47:53.652 | DEBUG    | src.core.preprocessing_service:clean_data:35 - Dropped columns: []
-2026-07-04 17:48:17.992 | DEBUG    | src.core.preprocessing_service:clean_data:43 - Converted MT_* columns to numeric.
-2026-07-04 17:48:18.105 | DEBUG    | src.core.preprocessing_service:clean_data:53 - Applied frequency conversion factor 0.25 to MT_* columns.
-2026-07-04 17:48:18.286 | DEBUG    | src.core.preprocessing_service:clean_data:77 - Applied imputation strategy: forward_fill
-2026-07-04 17:48:18.286 | INFO     | __main__:main:59 - Validating Preprocessed Data Contract...
-2026-07-04 17:48:18.286 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 20:41:38.968 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 20:41:38.974 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 20:41:38.974 | INFO     | src.core.train_orchestrator:_phase_preprocessing:88 - Preprocessing started...
+2026-07-07 20:41:38.974 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 20:41:39.113 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 20:42:03.644 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 20:42:03.773 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 20:42:03.972 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 20:42:03.972 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 20:42:03.972 | INFO     | src.core.train_orchestrator:_phase_preprocessing:94 - Validating Preprocessed Data Contract...
+2026-07-07 20:42:03.973 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 17:48:18.287 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 17:48:18.294 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 17:48:18.896 | DEBUG    | src.core.feature_engineering:transform:33 - Created total_load from 370 MT_* columns.
-2026-07-04 17:48:18.915 | DEBUG    | src.core.feature_engineering:transform:49 - Created time-based engineered features.
-2026-07-04 17:48:18.917 | INFO     | __main__:main:71 - Validating Engineered Data Contract...
-2026-07-04 17:48:18.918 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 20:42:03.973 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 20:42:03.980 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 20:42:03.980 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:107 - Feature Engineering started...
+2026-07-07 20:42:03.981 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 20:42:04.546 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 20:42:04.565 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 20:42:04.567 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 20:42:04.567 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:111 - Validating Engineered Data Contract...
+2026-07-07 20:42:04.567 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 17:48:18.918 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 17:48:18.925 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 17:48:38.345 | INFO     | src.core.preprocessing_service:save_processed_data:85 - Successfully saved sanitized data to: C:\mlops\projects\energy_forecasting\data\processed\cleaned_data.csv
-2026-07-04 17:48:38.445 | INFO     | src.core.splitter_service:split:48 - Split complete. X_train shape: (105120, 373). Features: ['MT_001', 'MT_002', 'MT_003', 'MT_004', 'MT_005', 'MT_006', 'MT_007', 'MT_008', 'MT_009', 'MT_010', 'MT_011', 'MT_012', 'MT_013', 'MT_014', 'MT_015', 'MT_016', 'MT_017', 'MT_018', 'MT_019', 'MT_020', 'MT_021', 'MT_022', 'MT_023', 'MT_024', 'MT_025', 'MT_026', 'MT_027', 'MT_028', 'MT_029', 'MT_030', 'MT_031', 'MT_032', 'MT_033', 'MT_034', 'MT_035', 'MT_036', 'MT_037', 'MT_038', 'MT_039', 'MT_040', 'MT_041', 'MT_042', 'MT_043', 'MT_044', 'MT_045', 'MT_046', 'MT_047', 'MT_048', 'MT_049', 'MT_050', 'MT_051', 'MT_052', 'MT_053', 'MT_054', 'MT_055', 'MT_056', 'MT_057', 'MT_058', 'MT_059', 'MT_060', 'MT_061', 'MT_062', 'MT_063', 'MT_064', 'MT_065', 'MT_066', 'MT_067', 'MT_068', 'MT_069', 'MT_070', 'MT_071', 'MT_072', 'MT_073', 'MT_074', 'MT_075', 'MT_076', 'MT_077', 'MT_078', 'MT_079', 'MT_080', 'MT_081', 'MT_082', 'MT_083', 'MT_084', 'MT_085', 'MT_086', 'MT_087', 'MT_088', 'MT_089', 'MT_090', 'MT_091', 'MT_092', 'MT_093', 'MT_094', 'MT_095', 'MT_096', 'MT_097', 'MT_098', 'MT_099', 'MT_100', 'MT_101', 'MT_102', 'MT_103', 'MT_104', 'MT_105', 'MT_106', 'MT_107', 'MT_108', 'MT_109', 'MT_110', 'MT_111', 'MT_112', 'MT_113', 'MT_114', 'MT_115', 'MT_116', 'MT_117', 'MT_118', 'MT_119', 'MT_120', 'MT_121', 'MT_122', 'MT_123', 'MT_124', 'MT_125', 'MT_126', 'MT_127', 'MT_128', 'MT_129', 'MT_130', 'MT_131', 'MT_132', 'MT_133', 'MT_134', 'MT_135', 'MT_136', 'MT_137', 'MT_138', 'MT_139', 'MT_140', 'MT_141', 'MT_142', 'MT_143', 'MT_144', 'MT_145', 'MT_146', 'MT_147', 'MT_148', 'MT_149', 'MT_150', 'MT_151', 'MT_152', 'MT_153', 'MT_154', 'MT_155', 'MT_156', 'MT_157', 'MT_158', 'MT_159', 'MT_160', 'MT_161', 'MT_162', 'MT_163', 'MT_164', 'MT_165', 'MT_166', 'MT_167', 'MT_168', 'MT_169', 'MT_170', 'MT_171', 'MT_172', 'MT_173', 'MT_174', 'MT_175', 'MT_176', 'MT_177', 'MT_178', 'MT_179', 'MT_180', 'MT_181', 'MT_182', 'MT_183', 'MT_184', 'MT_185', 'MT_186', 'MT_187', 'MT_188', 'MT_189', 'MT_190', 'MT_191', 'MT_192', 'MT_193', 'MT_194', 'MT_195', 'MT_196', 'MT_197', 'MT_198', 'MT_199', 'MT_200', 'MT_201', 'MT_202', 'MT_203', 'MT_204', 'MT_205', 'MT_206', 'MT_207', 'MT_208', 'MT_209', 'MT_210', 'MT_211', 'MT_212', 'MT_213', 'MT_214', 'MT_215', 'MT_216', 'MT_217', 'MT_218', 'MT_219', 'MT_220', 'MT_221', 'MT_222', 'MT_223', 'MT_224', 'MT_225', 'MT_226', 'MT_227', 'MT_228', 'MT_229', 'MT_230', 'MT_231', 'MT_232', 'MT_233', 'MT_234', 'MT_235', 'MT_236', 'MT_237', 'MT_238', 'MT_239', 'MT_240', 'MT_241', 'MT_242', 'MT_243', 'MT_244', 'MT_245', 'MT_246', 'MT_247', 'MT_248', 'MT_249', 'MT_250', 'MT_251', 'MT_252', 'MT_253', 'MT_254', 'MT_255', 'MT_256', 'MT_257', 'MT_258', 'MT_259', 'MT_260', 'MT_261', 'MT_262', 'MT_263', 'MT_264', 'MT_265', 'MT_266', 'MT_267', 'MT_268', 'MT_269', 'MT_270', 'MT_271', 'MT_272', 'MT_273', 'MT_274', 'MT_275', 'MT_276', 'MT_277', 'MT_278', 'MT_279', 'MT_280', 'MT_281', 'MT_282', 'MT_283', 'MT_284', 'MT_285', 'MT_286', 'MT_287', 'MT_288', 'MT_289', 'MT_290', 'MT_291', 'MT_292', 'MT_293', 'MT_294', 'MT_295', 'MT_296', 'MT_297', 'MT_298', 'MT_299', 'MT_300', 'MT_301', 'MT_302', 'MT_303', 'MT_304', 'MT_305', 'MT_306', 'MT_307', 'MT_308', 'MT_309', 'MT_310', 'MT_311', 'MT_312', 'MT_313', 'MT_314', 'MT_315', 'MT_316', 'MT_317', 'MT_318', 'MT_319', 'MT_320', 'MT_321', 'MT_322', 'MT_323', 'MT_324', 'MT_325', 'MT_326', 'MT_327', 'MT_328', 'MT_329', 'MT_330', 'MT_331', 'MT_332', 'MT_333', 'MT_334', 'MT_335', 'MT_336', 'MT_337', 'MT_338', 'MT_339', 'MT_340', 'MT_341', 'MT_342', 'MT_343', 'MT_344', 'MT_345', 'MT_346', 'MT_347', 'MT_348', 'MT_349', 'MT_350', 'MT_351', 'MT_352', 'MT_353', 'MT_354', 'MT_355', 'MT_356', 'MT_357', 'MT_358', 'MT_359', 'MT_360', 'MT_361', 'MT_362', 'MT_363', 'MT_364', 'MT_365', 'MT_366', 'MT_367', 'MT_368', 'MT_369', 'MT_370', 'hour_of_day', 'day_of_week', 'is_weekend']
-2026-07-04 17:48:38.447 | INFO     | __main__:main:90 - --- Starting Model Engineering Phase ---
-2026-07-04 17:48:38.447 | INFO     | src.infra.artifact_manager:__init__:30 - ArtifactManager initialized. Project Root: C:\mlops\projects\energy_forecasting
-2026-07-04 17:48:38.447 | INFO     | src.core.modeling:get_worker:60 - Factory instantiating worker for: random_forest_regressor
-2026-07-04 17:48:38.448 | INFO     | src.core.modeling:train:32 - Training RandomForestRegressor model...
-2026-07-04 17:48:51.662 | INFO     | src.infra.artifact_manager:save_model:38 - Model artifact saved to: artifacts\models\Energy_Forecast_RF_Regressor.joblib
-2026-07-04 17:48:51.663 | INFO     | __main__:main:110 - --- Starting Evaluation Phase ---
-2026-07-04 17:48:51.663 | INFO     | src.core.evaluator:evaluate:9 - Evaluating model performance...
-2026-07-04 17:48:51.712 | INFO     | src.core.evaluator:evaluate:17 - Evaluation complete. Metrics: {'rmse': 2630.7579763625627, 'mse': 6920887.530195246}
-2026-07-04 17:48:51.713 | INFO     | src.infra.artifact_manager:save_metrics:68 - Metrics artifact saved to: artifacts\metadata\Energy_Forecast_RF_Regressor_metrics.json
-2026-07-04 17:48:51.713 | SUCCESS  | __main__:main:124 - Pipeline executed successfully.
-2026-07-04 19:02:26.012 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
-2026-07-04 19:02:26.013 | INFO     | __main__:main:26 - Configuration loaded successfully.
-2026-07-04 19:02:26.013 | INFO     | __main__:main:39 - Pipeline started
-2026-07-04 19:02:26.013 | INFO     | __main__:main:45 - Loading raw data
-2026-07-04 19:02:26.013 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
-2026-07-04 19:02:26.014 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
-2026-07-04 19:02:26.032 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
-2026-07-04 19:02:33.023 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
-2026-07-04 19:02:33.669 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
-2026-07-04 19:02:33.669 | INFO     | __main__:main:50 - Validating Raw Data Contract...
-2026-07-04 19:02:33.669 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 20:42:04.567 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 20:42:04.575 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 20:42:04.575 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:114 - Saving Processed data...
+2026-07-07 20:42:24.338 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 20:42:24.338 | INFO     | src.core.train_orchestrator:_phase_splitting:129 - Data Splitter - Time Series - started...
+2026-07-07 20:42:24.338 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 20:42:24.340 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 20:42:24.437 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 20:42:24.439 | INFO     | src.core.train_orchestrator:_phase_modeling:148 - --- Starting Model Engineering Phase ---
+2026-07-07 20:42:24.439 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 20:42:24.439 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 20:42:24.439 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 20:42:37.881 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 20:42:37.881 | INFO     | src.core.train_orchestrator:_phase_modeling:153 - Saving Model
+2026-07-07 20:42:37.905 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 20:42:37.905 | INFO     | src.core.train_orchestrator:_phase_evaluation:166 - --- Starting Evaluation Phase ---
+2026-07-07 20:42:37.906 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 20:42:37.955 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 20:42:37.955 | INFO     | src.core.train_orchestrator:_phase_evaluation:170 - Saving Model Metrics
+2026-07-07 20:42:37.956 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 20:42:37.956 | INFO     | src.core.train_orchestrator:run:218 - Pipeline executed successfully.
+2026-07-07 21:02:07.174 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 21:02:07.174 | INFO     | __main__:main:24 - System Bootstrapping...
+2026-07-07 21:02:07.175 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 21:02:07.175 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 21:02:07.175 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 21:02:07.175 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 21:02:07.175 | INFO     | src.core.train_orchestrator:run:188 - Configuration loaded successfully.
+2026-07-07 21:02:07.175 | INFO     | src.core.train_orchestrator:run:189 - Pipeline started
+2026-07-07 21:02:07.176 | INFO     | src.core.train_orchestrator:_phase_ingestion:70 - Loading raw data
+2026-07-07 21:02:07.176 | INFO     | src.core.train_orchestrator:_phase_ingestion:73 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 21:02:07.176 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 21:02:07.176 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 21:02:07.195 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 21:02:14.193 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 21:02:14.839 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 21:02:14.839 | INFO     | src.core.train_orchestrator:_phase_ingestion:78 - Validating Raw Data Contract...
+2026-07-07 21:02:14.840 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
-2026-07-04 19:02:33.669 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 19:02:33.676 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 19:02:33.676 | INFO     | __main__:main:53 - Preprocessing started...
-2026-07-04 19:02:33.676 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
-2026-07-04 19:02:33.677 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
-2026-07-04 19:02:33.823 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
-2026-07-04 19:02:57.910 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
-2026-07-04 19:02:58.036 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
-2026-07-04 19:02:58.219 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
-2026-07-04 19:02:58.219 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
-2026-07-04 19:02:58.219 | INFO     | __main__:main:62 - Validating Preprocessed Data Contract...
-2026-07-04 19:02:58.219 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 21:02:14.840 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:02:14.846 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:02:14.846 | INFO     | src.core.train_orchestrator:_phase_preprocessing:88 - Preprocessing started...
+2026-07-07 21:02:14.847 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 21:02:14.983 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 21:02:39.152 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 21:02:39.271 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 21:02:39.455 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 21:02:39.455 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 21:02:39.455 | INFO     | src.core.train_orchestrator:_phase_preprocessing:94 - Validating Preprocessed Data Contract...
+2026-07-07 21:02:39.456 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 19:02:58.220 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 19:02:58.227 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 19:02:58.227 | INFO     | __main__:main:65 - Feature Engineering started...
-2026-07-04 19:02:58.227 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
-2026-07-04 19:02:58.228 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
-2026-07-04 19:02:58.791 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
-2026-07-04 19:02:58.810 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
-2026-07-04 19:02:58.811 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
-2026-07-04 19:02:58.811 | INFO     | __main__:main:73 - Validating Engineered Data Contract...
-2026-07-04 19:02:58.811 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 21:02:39.456 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:02:39.463 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:02:39.464 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:107 - Feature Engineering started...
+2026-07-07 21:02:39.464 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 21:02:40.058 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 21:02:40.077 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 21:02:40.078 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 21:02:40.078 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:111 - Validating Engineered Data Contract...
+2026-07-07 21:02:40.078 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 19:02:58.812 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 19:02:58.819 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 19:02:58.819 | INFO     | __main__:main:76 - Saving Processed data...
-2026-07-04 19:03:18.649 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
-2026-07-04 19:03:18.649 | INFO     | __main__:main:82 - Data Splitter - Time Series - started...
-2026-07-04 19:03:18.649 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
-2026-07-04 19:03:18.649 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
-2026-07-04 19:03:18.651 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
-2026-07-04 19:03:18.746 | INFO     | src.core.splitter_service:split:78 - Split complete
-2026-07-04 19:03:18.748 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
-2026-07-04 19:03:18.749 | INFO     | __main__:main:99 - --- Starting Model Engineering Phase ---
-2026-07-04 19:03:18.749 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
-2026-07-04 19:03:18.749 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
-2026-07-04 19:03:18.749 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
-2026-07-04 19:03:31.657 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
-2026-07-04 19:03:31.657 | INFO     | __main__:main:103 - Saving Model
-2026-07-04 19:03:31.682 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
-2026-07-04 19:03:31.682 | INFO     | __main__:main:106 - --- Starting Evaluation Phase ---
-2026-07-04 19:03:31.682 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
-2026-07-04 19:03:31.736 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
-2026-07-04 19:03:31.736 | INFO     | __main__:main:109 - Saving Model Metrics
-2026-07-04 19:03:31.737 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
-2026-07-04 19:03:31.737 | INFO     | __main__:main:118 - Pipeline executed successfully.
-2026-07-04 19:41:05.280 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
-2026-07-04 19:41:05.280 | INFO     | __main__:main:26 - Configuration loaded successfully.
-2026-07-04 19:41:05.281 | INFO     | __main__:main:39 - Pipeline started
-2026-07-04 19:41:05.281 | INFO     | __main__:main:45 - Loading raw data
-2026-07-04 19:41:05.281 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
-2026-07-04 19:41:05.282 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
-2026-07-04 19:41:05.307 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
-2026-07-04 19:41:12.320 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
-2026-07-04 19:41:13.001 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
-2026-07-04 19:41:13.001 | INFO     | __main__:main:50 - Validating Raw Data Contract...
-2026-07-04 19:41:13.001 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 21:02:40.079 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:02:40.086 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:02:40.086 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:114 - Saving Processed data...
+2026-07-07 21:02:59.228 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 21:02:59.228 | INFO     | src.core.train_orchestrator:_phase_splitting:129 - Data Splitter - Time Series - started...
+2026-07-07 21:02:59.228 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 21:02:59.230 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 21:02:59.325 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 21:02:59.327 | INFO     | src.core.train_orchestrator:_phase_modeling:148 - --- Starting Model Engineering Phase ---
+2026-07-07 21:02:59.327 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 21:02:59.327 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 21:02:59.328 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 21:03:12.510 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 21:03:12.511 | INFO     | src.core.train_orchestrator:_phase_modeling:153 - Saving Model
+2026-07-07 21:03:12.536 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 21:03:12.536 | INFO     | src.core.train_orchestrator:_phase_evaluation:166 - --- Starting Evaluation Phase ---
+2026-07-07 21:03:12.537 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 21:03:12.586 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 21:03:12.586 | INFO     | src.core.train_orchestrator:_phase_evaluation:170 - Saving Model Metrics
+2026-07-07 21:03:12.587 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 21:03:12.587 | INFO     | src.core.train_orchestrator:run:219 - Pipeline executed successfully.
+2026-07-07 21:14:25.092 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 21:14:25.092 | INFO     | __main__:main:24 - System Bootstrapping...
+2026-07-07 21:14:25.093 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 21:14:25.093 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 21:14:25.093 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 21:14:25.094 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 21:14:25.094 | INFO     | src.core.train_orchestrator:run:188 - Configuration loaded successfully.
+2026-07-07 21:14:25.094 | INFO     | src.core.train_orchestrator:run:189 - Pipeline started
+2026-07-07 21:14:25.094 | INFO     | src.core.train_orchestrator:_phase_ingestion:70 - Loading raw data
+2026-07-07 21:14:25.094 | INFO     | src.core.train_orchestrator:_phase_ingestion:73 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 21:14:25.094 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 21:14:25.095 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 21:14:25.113 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 21:14:32.176 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 21:14:32.819 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 21:14:32.819 | INFO     | src.core.train_orchestrator:_phase_ingestion:78 - Validating Raw Data Contract...
+2026-07-07 21:14:32.819 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
-2026-07-04 19:41:13.001 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 19:41:13.008 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 19:41:13.008 | INFO     | __main__:main:53 - Preprocessing started...
-2026-07-04 19:41:13.008 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
-2026-07-04 19:41:13.009 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
-2026-07-04 19:41:13.141 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
-2026-07-04 19:41:37.247 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
-2026-07-04 19:41:37.360 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
-2026-07-04 19:41:37.541 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
-2026-07-04 19:41:37.541 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
-2026-07-04 19:41:37.541 | INFO     | __main__:main:62 - Validating Preprocessed Data Contract...
-2026-07-04 19:41:37.542 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 21:14:32.820 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:14:32.826 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:14:32.826 | INFO     | src.core.train_orchestrator:_phase_preprocessing:88 - Preprocessing started...
+2026-07-07 21:14:32.826 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 21:14:32.972 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 21:14:57.170 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 21:14:57.290 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 21:14:57.466 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 21:14:57.467 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 21:14:57.467 | INFO     | src.core.train_orchestrator:_phase_preprocessing:94 - Validating Preprocessed Data Contract...
+2026-07-07 21:14:57.467 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 19:41:37.542 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 19:41:37.549 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 19:41:37.549 | INFO     | __main__:main:65 - Feature Engineering started...
-2026-07-04 19:41:37.550 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
-2026-07-04 19:41:37.550 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
-2026-07-04 19:41:38.150 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
-2026-07-04 19:41:38.169 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
-2026-07-04 19:41:38.172 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
-2026-07-04 19:41:38.172 | INFO     | __main__:main:73 - Validating Engineered Data Contract...
-2026-07-04 19:41:38.172 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+2026-07-07 21:14:57.467 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:14:57.475 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:14:57.475 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:107 - Feature Engineering started...
+2026-07-07 21:14:57.476 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 21:14:58.142 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 21:14:58.162 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 21:14:58.163 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 21:14:58.163 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:111 - Validating Engineered Data Contract...
+2026-07-07 21:14:58.163 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
 Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
-2026-07-04 19:41:38.172 | INFO     | src.core.validator:validate:54 - Starting contract validation...
-2026-07-04 19:41:38.180 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
-2026-07-04 19:41:38.180 | INFO     | __main__:main:76 - Saving Processed data...
-2026-07-04 19:41:58.212 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
-2026-07-04 19:41:58.212 | INFO     | __main__:main:82 - Data Splitter - Time Series - started...
-2026-07-04 19:41:58.213 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
-2026-07-04 19:41:58.213 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
-2026-07-04 19:41:58.215 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
-2026-07-04 19:41:58.312 | INFO     | src.core.splitter_service:split:78 - Split complete
-2026-07-04 19:41:58.314 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
-2026-07-04 19:41:58.314 | INFO     | __main__:main:99 - --- Starting Model Engineering Phase ---
-2026-07-04 19:41:58.314 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
-2026-07-04 19:41:58.315 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
-2026-07-04 19:41:58.315 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
-2026-07-04 19:42:11.668 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
-2026-07-04 19:42:11.668 | INFO     | __main__:main:103 - Saving Model
-2026-07-04 19:42:11.692 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
-2026-07-04 19:42:11.692 | INFO     | __main__:main:106 - --- Starting Evaluation Phase ---
-2026-07-04 19:42:11.692 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
-2026-07-04 19:42:11.742 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
-2026-07-04 19:42:11.742 | INFO     | __main__:main:109 - Saving Model Metrics
-2026-07-04 19:42:11.743 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
-2026-07-04 19:42:11.744 | INFO     | __main__:main:118 - Pipeline executed successfully.
+2026-07-07 21:14:58.164 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:14:58.171 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:14:58.171 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:114 - Saving Processed data...
+2026-07-07 21:15:17.795 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 21:15:17.796 | INFO     | src.core.train_orchestrator:_phase_splitting:129 - Data Splitter - Time Series - started...
+2026-07-07 21:15:17.796 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 21:15:17.797 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 21:15:17.894 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 21:15:17.896 | INFO     | src.core.train_orchestrator:_phase_modeling:148 - --- Starting Model Engineering Phase ---
+2026-07-07 21:15:17.896 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 21:15:17.896 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 21:15:17.896 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 21:15:31.806 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 21:15:31.806 | INFO     | src.core.train_orchestrator:_phase_modeling:153 - Saving Model
+2026-07-07 21:15:31.831 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 21:15:31.831 | INFO     | src.core.train_orchestrator:_phase_evaluation:166 - --- Starting Evaluation Phase ---
+2026-07-07 21:15:31.831 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 21:15:31.881 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 21:15:31.881 | INFO     | src.core.train_orchestrator:_phase_evaluation:170 - Saving Model Metrics
+2026-07-07 21:15:31.882 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 21:15:31.882 | INFO     | src.core.train_orchestrator:run:219 - Pipeline executed successfully.
+2026-07-07 21:15:31.882 | ERROR    | __main__:main:73 - Unexpected System Failure
+Traceback (most recent call last):
+
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+
+  File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 77, in <module>
+    main()
+    └ <function main at 0x00000296BC383920>
+
+> File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 67, in main
+    orchestrator.run()
+    │            └ <function TrainingOrchestrator.run at 0x00000296DDB29B20>
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x00000296DDB44050>
+
+  File "C:\mlops\projects\energy_forecasting\src\core\train_orchestrator.py", line 232, in run
+    self._snapshot_config(metadata)
+    │    │                └ PipelineRunMetadata(run_id='f0b46057aa4c4892bc28c5fbc45710dd', pipeline_name='train_pipeline', status='SUCCESS', started_at=d...
+    │    └ <function TrainingOrchestrator._snapshot_config at 0x00000296DDB29D00>
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x00000296DDB44050>
+
+  File "C:\mlops\projects\energy_forecasting\src\core\train_orchestrator.py", line 290, in _snapshot_config
+    config_dict = self.config.dict()
+                  │    └ AppConfig(project_name='Modular AutoML Energy Forecasting System', version='1.0.0', env=EnvConfig(mode='dev', compute={'num_w...
+                  └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x00000296DDB44050>
+
+AttributeError: 'AppConfig' object has no attribute 'dict'
+2026-07-07 21:24:31.771 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 21:24:31.771 | INFO     | __main__:main:24 - System Bootstrapping...
+2026-07-07 21:24:31.772 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 21:24:31.772 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 21:24:31.772 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 21:24:31.772 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 21:24:31.773 | INFO     | src.core.train_orchestrator:run:190 - Configuration loaded successfully.
+2026-07-07 21:24:31.773 | INFO     | src.core.train_orchestrator:run:191 - Pipeline started
+2026-07-07 21:24:31.773 | INFO     | src.core.train_orchestrator:_phase_ingestion:72 - Loading raw data
+2026-07-07 21:24:31.773 | INFO     | src.core.train_orchestrator:_phase_ingestion:75 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 21:24:31.773 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 21:24:31.774 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 21:24:31.792 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 21:24:38.844 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 21:24:39.487 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 21:24:39.487 | INFO     | src.core.train_orchestrator:_phase_ingestion:80 - Validating Raw Data Contract...
+2026-07-07 21:24:39.488 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-07 21:24:39.488 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:24:39.495 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:24:39.495 | INFO     | src.core.train_orchestrator:_phase_preprocessing:90 - Preprocessing started...
+2026-07-07 21:24:39.495 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 21:24:39.634 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 21:25:03.744 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 21:25:03.857 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 21:25:04.064 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 21:25:04.064 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 21:25:04.065 | INFO     | src.core.train_orchestrator:_phase_preprocessing:96 - Validating Preprocessed Data Contract...
+2026-07-07 21:25:04.065 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 21:25:04.065 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:25:04.073 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:25:04.073 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:109 - Feature Engineering started...
+2026-07-07 21:25:04.073 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 21:25:04.652 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 21:25:04.671 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 21:25:04.672 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 21:25:04.672 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:113 - Validating Engineered Data Contract...
+2026-07-07 21:25:04.672 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 21:25:04.673 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:25:04.680 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:25:04.680 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:116 - Saving Processed data...
+2026-07-07 21:25:23.979 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 21:25:23.979 | INFO     | src.core.train_orchestrator:_phase_splitting:131 - Data Splitter - Time Series - started...
+2026-07-07 21:25:23.979 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 21:25:23.981 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 21:25:24.077 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 21:25:24.079 | INFO     | src.core.train_orchestrator:_phase_modeling:150 - --- Starting Model Engineering Phase ---
+2026-07-07 21:25:24.079 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 21:25:24.079 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 21:25:24.079 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 21:25:36.921 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 21:25:36.922 | INFO     | src.core.train_orchestrator:_phase_modeling:155 - Saving Model
+2026-07-07 21:25:36.946 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 21:25:36.946 | INFO     | src.core.train_orchestrator:_phase_evaluation:168 - --- Starting Evaluation Phase ---
+2026-07-07 21:25:36.946 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 21:25:36.995 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 21:25:36.996 | INFO     | src.core.train_orchestrator:_phase_evaluation:172 - Saving Model Metrics
+2026-07-07 21:25:36.997 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 21:25:36.997 | INFO     | src.core.train_orchestrator:run:221 - Pipeline executed successfully.
+2026-07-07 21:25:36.998 | ERROR    | __main__:main:73 - Unexpected System Failure
+Traceback (most recent call last):
+
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+
+  File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 77, in <module>
+    main()
+    └ <function main at 0x00000221B1D53920>
+
+> File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 67, in main
+    orchestrator.run()
+    │            └ <function TrainingOrchestrator.run at 0x00000221D34E9B20>
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x00000221D3504050>
+
+  File "C:\mlops\projects\energy_forecasting\src\core\train_orchestrator.py", line 234, in run
+    self._snapshot_config(metadata)
+    │    │                └ PipelineRunMetadata(run_id='f9147a8d78ce44b3af30037dc9244f8e', pipeline_name='train_pipeline', status='SUCCESS', started_at=d...
+    │    └ <function TrainingOrchestrator._snapshot_config at 0x00000221D34E9D00>
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x00000221D3504050>
+
+  File "C:\mlops\projects\energy_forecasting\src\core\train_orchestrator.py", line 296, in _snapshot_config
+    yaml.safe_dump(config_dict, f)
+    │    │         │            └ <_io.TextIOWrapper name='C:\\mlops\\projects\\energy_forecasting\\artifacts\\metadata\\config_f9147a8d78ce44b3af30037dc9244f8...
+    │    │         └ {'project_name': 'Modular AutoML Energy Forecasting System', 'version': '1.0.0', 'env': {'mode': 'dev', 'compute': {'num_work...
+    │    └ <function safe_dump at 0x00000221AFC70F40>
+    └ <module 'yaml' from 'C:\\mlops\\projects\\energy_forecasting\\.venv\\Lib\\site-packages\\yaml\\__init__.py'>
+
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\__init__.py", line 269, in safe_dump
+    return dump_all([data], stream, Dumper=SafeDumper, **kwds)
+           │         │      │              │             └ {}
+           │         │      │              └ <class 'yaml.dumper.SafeDumper'>
+           │         │      └ <_io.TextIOWrapper name='C:\\mlops\\projects\\energy_forecasting\\artifacts\\metadata\\config_f9147a8d78ce44b3af30037dc9244f8...
+           │         └ {'project_name': 'Modular AutoML Energy Forecasting System', 'version': '1.0.0', 'env': {'mode': 'dev', 'compute': {'num_work...
+           └ <function dump_all at 0x00000221AFC70D60>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\__init__.py", line 241, in dump_all
+    dumper.represent(data)
+    │      │         └ {'project_name': 'Modular AutoML Energy Forecasting System', 'version': '1.0.0', 'env': {'mode': 'dev', 'compute': {'num_work...
+    │      └ <function BaseRepresenter.represent at 0x00000221AFC5A660>
+    └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 27, in represent
+    node = self.represent_data(data)
+           │    │              └ {'project_name': 'Modular AutoML Energy Forecasting System', 'version': '1.0.0', 'env': {'mode': 'dev', 'compute': {'num_work...
+           │    └ <function BaseRepresenter.represent_data at 0x00000221AFC5A700>
+           └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 48, in represent_data
+    node = self.yaml_representers[data_types[0]](self, data)
+           │    │                 │              │     └ {'project_name': 'Modular AutoML Energy Forecasting System', 'version': '1.0.0', 'env': {'mode': 'dev', 'compute': {'num_work...
+           │    │                 │              └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+           │    │                 └ (<class 'dict'>, <class 'object'>)
+           │    └ {<class 'NoneType'>: <function SafeRepresenter.represent_none at 0x00000221AFC5AD40>, <class 'str'>: <function SafeRepresente...
+           └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 207, in represent_dict
+    return self.represent_mapping('tag:yaml.org,2002:map', data)
+           │    │                                          └ {'project_name': 'Modular AutoML Energy Forecasting System', 'version': '1.0.0', 'env': {'mode': 'dev', 'compute': {'num_work...
+           │    └ <function BaseRepresenter.represent_mapping at 0x00000221AFC5AB60>
+           └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 118, in represent_mapping
+    node_value = self.represent_data(item_value)
+                 │    │              └ {'raw_data': 'data/raw', 'processed_data': 'data/processed', 'interim_data': 'data/interim', 'logs': 'logs', 'project_root': ...
+                 │    └ <function BaseRepresenter.represent_data at 0x00000221AFC5A700>
+                 └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 48, in represent_data
+    node = self.yaml_representers[data_types[0]](self, data)
+           │    │                 │              │     └ {'raw_data': 'data/raw', 'processed_data': 'data/processed', 'interim_data': 'data/interim', 'logs': 'logs', 'project_root': ...
+           │    │                 │              └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+           │    │                 └ (<class 'dict'>, <class 'object'>)
+           │    └ {<class 'NoneType'>: <function SafeRepresenter.represent_none at 0x00000221AFC5AD40>, <class 'str'>: <function SafeRepresente...
+           └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 207, in represent_dict
+    return self.represent_mapping('tag:yaml.org,2002:map', data)
+           │    │                                          └ {'raw_data': 'data/raw', 'processed_data': 'data/processed', 'interim_data': 'data/interim', 'logs': 'logs', 'project_root': ...
+           │    └ <function BaseRepresenter.represent_mapping at 0x00000221AFC5AB60>
+           └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 118, in represent_mapping
+    node_value = self.represent_data(item_value)
+                 │    │              └ WindowsPath('C:/mlops/projects/energy_forecasting')
+                 │    └ <function BaseRepresenter.represent_data at 0x00000221AFC5A700>
+                 └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 58, in represent_data
+    node = self.yaml_representers[None](self, data)
+           │    │                       │     └ WindowsPath('C:/mlops/projects/energy_forecasting')
+           │    │                       └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+           │    └ {<class 'NoneType'>: <function SafeRepresenter.represent_none at 0x00000221AFC5AD40>, <class 'str'>: <function SafeRepresente...
+           └ <yaml.dumper.SafeDumper object at 0x00000221D3504830>
+  File "C:\mlops\projects\energy_forecasting\.venv\Lib\site-packages\yaml\representer.py", line 231, in represent_undefined
+    raise RepresenterError("cannot represent an object", data)
+          │                                              └ WindowsPath('C:/mlops/projects/energy_forecasting')
+          └ <class 'yaml.representer.RepresenterError'>
+
+yaml.representer.RepresenterError: ('cannot represent an object', WindowsPath('C:/mlops/projects/energy_forecasting'))
+2026-07-07 21:28:33.020 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 21:28:33.020 | INFO     | __main__:main:24 - System Bootstrapping...
+2026-07-07 21:28:33.021 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 21:28:33.021 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 21:28:33.021 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 21:28:33.021 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 21:28:33.021 | INFO     | src.core.train_orchestrator:run:191 - Configuration loaded successfully.
+2026-07-07 21:28:33.022 | INFO     | src.core.train_orchestrator:run:192 - Pipeline started
+2026-07-07 21:28:33.022 | INFO     | src.core.train_orchestrator:_phase_ingestion:73 - Loading raw data
+2026-07-07 21:28:33.022 | INFO     | src.core.train_orchestrator:_phase_ingestion:76 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 21:28:33.022 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 21:28:33.022 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 21:28:33.040 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 21:28:40.082 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 21:28:40.754 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 21:28:40.754 | INFO     | src.core.train_orchestrator:_phase_ingestion:81 - Validating Raw Data Contract...
+2026-07-07 21:28:40.754 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-07 21:28:40.755 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:28:40.761 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:28:40.761 | INFO     | src.core.train_orchestrator:_phase_preprocessing:91 - Preprocessing started...
+2026-07-07 21:28:40.762 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 21:28:40.901 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 21:29:04.984 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 21:29:05.104 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 21:29:05.289 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 21:29:05.289 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 21:29:05.290 | INFO     | src.core.train_orchestrator:_phase_preprocessing:97 - Validating Preprocessed Data Contract...
+2026-07-07 21:29:05.290 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 21:29:05.290 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:29:05.298 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:29:05.298 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:110 - Feature Engineering started...
+2026-07-07 21:29:05.298 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 21:29:05.912 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 21:29:05.931 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 21:29:05.933 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 21:29:05.933 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:114 - Validating Engineered Data Contract...
+2026-07-07 21:29:05.933 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 21:29:05.933 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:29:05.941 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:29:05.941 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:117 - Saving Processed data...
+2026-07-07 21:29:25.324 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 21:29:25.324 | INFO     | src.core.train_orchestrator:_phase_splitting:132 - Data Splitter - Time Series - started...
+2026-07-07 21:29:25.325 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 21:29:25.326 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 21:29:25.424 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 21:29:25.426 | INFO     | src.core.train_orchestrator:_phase_modeling:151 - --- Starting Model Engineering Phase ---
+2026-07-07 21:29:25.426 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 21:29:25.426 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 21:29:25.427 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 21:29:38.334 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 21:29:38.334 | INFO     | src.core.train_orchestrator:_phase_modeling:156 - Saving Model
+2026-07-07 21:29:38.359 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 21:29:38.359 | INFO     | src.core.train_orchestrator:_phase_evaluation:169 - --- Starting Evaluation Phase ---
+2026-07-07 21:29:38.360 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 21:29:38.409 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 21:29:38.409 | INFO     | src.core.train_orchestrator:_phase_evaluation:173 - Saving Model Metrics
+2026-07-07 21:29:38.410 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 21:29:38.410 | INFO     | src.core.train_orchestrator:run:222 - Pipeline executed successfully.
+2026-07-07 21:29:38.410 | ERROR    | __main__:main:73 - Unexpected System Failure
+Traceback (most recent call last):
+
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+
+  File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 77, in <module>
+    main()
+    └ <function main at 0x00000264AEB43920>
+
+> File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 67, in main
+    orchestrator.run()
+    │            └ <function TrainingOrchestrator.run at 0x00000264D02E9C60>
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x00000264D02F8050>
+
+  File "C:\mlops\projects\energy_forecasting\src\core\train_orchestrator.py", line 235, in run
+    self._snapshot_config(metadata)
+    │                     └ PipelineRunMetadata(run_id='a342baed90ea4198a60e84b1f6b05a51', pipeline_name='train_pipeline', status='SUCCESS', started_at=d...
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x00000264D02F8050>
+
+AttributeError: 'TrainingOrchestrator' object has no attribute '_snapshot_config'
+2026-07-07 21:30:06.794 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 21:30:06.794 | INFO     | __main__:main:24 - System Bootstrapping...
+2026-07-07 21:30:06.794 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 21:30:06.795 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 21:30:06.795 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 21:30:06.795 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 21:30:06.795 | INFO     | src.core.train_orchestrator:run:191 - Configuration loaded successfully.
+2026-07-07 21:30:06.795 | INFO     | src.core.train_orchestrator:run:192 - Pipeline started
+2026-07-07 21:30:06.796 | INFO     | src.core.train_orchestrator:_phase_ingestion:73 - Loading raw data
+2026-07-07 21:30:06.796 | INFO     | src.core.train_orchestrator:_phase_ingestion:76 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 21:30:06.796 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 21:30:06.796 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 21:30:06.814 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 21:30:13.823 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 21:30:14.464 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 21:30:14.464 | INFO     | src.core.train_orchestrator:_phase_ingestion:81 - Validating Raw Data Contract...
+2026-07-07 21:30:14.464 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-07 21:30:14.464 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:30:14.471 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:30:14.471 | INFO     | src.core.train_orchestrator:_phase_preprocessing:91 - Preprocessing started...
+2026-07-07 21:30:14.471 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 21:30:14.607 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 21:30:38.575 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 21:30:38.693 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 21:30:38.881 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 21:30:38.882 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 21:30:38.882 | INFO     | src.core.train_orchestrator:_phase_preprocessing:97 - Validating Preprocessed Data Contract...
+2026-07-07 21:30:38.882 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 21:30:38.882 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:30:38.890 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:30:38.890 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:110 - Feature Engineering started...
+2026-07-07 21:30:38.890 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 21:30:39.488 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 21:30:39.507 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 21:30:39.508 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 21:30:39.508 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:114 - Validating Engineered Data Contract...
+2026-07-07 21:30:39.508 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 21:30:39.509 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 21:30:39.516 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 21:30:39.516 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:117 - Saving Processed data...
+2026-07-07 21:30:58.689 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 21:30:58.690 | INFO     | src.core.train_orchestrator:_phase_splitting:132 - Data Splitter - Time Series - started...
+2026-07-07 21:30:58.690 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 21:30:58.691 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 21:30:58.790 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 21:30:58.791 | INFO     | src.core.train_orchestrator:_phase_modeling:151 - --- Starting Model Engineering Phase ---
+2026-07-07 21:30:58.792 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 21:30:58.792 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 21:30:58.792 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 21:31:11.616 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 21:31:11.616 | INFO     | src.core.train_orchestrator:_phase_modeling:156 - Saving Model
+2026-07-07 21:31:11.641 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 21:31:11.641 | INFO     | src.core.train_orchestrator:_phase_evaluation:169 - --- Starting Evaluation Phase ---
+2026-07-07 21:31:11.641 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 21:31:11.690 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 21:31:11.691 | INFO     | src.core.train_orchestrator:_phase_evaluation:173 - Saving Model Metrics
+2026-07-07 21:31:11.691 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 21:31:11.692 | INFO     | src.core.train_orchestrator:run:222 - Pipeline executed successfully.
+2026-07-07 22:09:32.126 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 22:09:32.126 | INFO     | __main__:main:25 - System Bootstrapping...
+2026-07-07 22:09:32.127 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 22:09:32.127 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 22:09:32.127 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 22:09:32.127 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 22:09:32.128 | ERROR    | __main__:main:78 - Unexpected System Failure
+Traceback (most recent call last):
+
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+
+  File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 82, in <module>
+    main()
+    └ <function main at 0x000001EA9572F920>
+
+> File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 58, in main
+    orchestrator = TrainingOrchestrator(
+                   └ <class 'src.core.train_orchestrator.TrainingOrchestrator'>
+
+TypeError: TrainingOrchestrator.__init__() got an unexpected keyword argument 'registry'
+2026-07-07 22:12:40.153 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 22:12:40.153 | INFO     | __main__:main:25 - System Bootstrapping...
+2026-07-07 22:12:40.154 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 22:12:40.154 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 22:12:40.154 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 22:12:40.154 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 22:12:40.155 | ERROR    | __main__:main:78 - Unexpected System Failure
+Traceback (most recent call last):
+
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+
+  File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 82, in <module>
+    main()
+    └ <function main at 0x000002CDCB53F920>
+
+> File "C:\mlops\projects\energy_forecasting\pipelines\train_pipeline.py", line 58, in main
+    orchestrator = TrainingOrchestrator(
+                   └ <class 'src.core.train_orchestrator.TrainingOrchestrator'>
+
+  File "C:\mlops\projects\energy_forecasting\src\core\train_orchestrator.py", line 58, in __init__
+    self._phase_registry - registry
+    │    │                 └ <src.core.model_registry.ModelRegistry object at 0x000002CDECC0FB60>
+    │    └ <function TrainingOrchestrator._phase_registry at 0x000002CDECCED940>
+    └ <src.core.train_orchestrator.TrainingOrchestrator object at 0x000002CDECC0FCB0>
+
+TypeError: unsupported operand type(s) for -: 'method' and 'ModelRegistry'
+2026-07-07 22:13:27.029 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 22:13:27.029 | INFO     | __main__:main:25 - System Bootstrapping...
+2026-07-07 22:13:27.030 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 22:13:27.030 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 22:13:27.030 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 22:13:27.030 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 22:13:27.031 | INFO     | src.core.train_orchestrator:run:209 - Configuration loaded successfully.
+2026-07-07 22:13:27.031 | INFO     | src.core.train_orchestrator:run:210 - Pipeline started
+2026-07-07 22:13:27.031 | INFO     | src.core.train_orchestrator:_phase_ingestion:75 - Loading raw data
+2026-07-07 22:13:27.031 | INFO     | src.core.train_orchestrator:_phase_ingestion:78 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 22:13:27.031 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 22:13:27.032 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 22:13:27.050 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 22:13:34.124 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 22:13:34.777 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 22:13:34.777 | INFO     | src.core.train_orchestrator:_phase_ingestion:83 - Validating Raw Data Contract...
+2026-07-07 22:13:34.777 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-07 22:13:34.777 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 22:13:34.784 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 22:13:34.784 | INFO     | src.core.train_orchestrator:_phase_preprocessing:93 - Preprocessing started...
+2026-07-07 22:13:34.784 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 22:13:34.916 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 22:13:58.894 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 22:13:59.013 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 22:13:59.223 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 22:13:59.223 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 22:13:59.223 | INFO     | src.core.train_orchestrator:_phase_preprocessing:99 - Validating Preprocessed Data Contract...
+2026-07-07 22:13:59.223 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 22:13:59.223 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 22:13:59.231 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 22:13:59.231 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:112 - Feature Engineering started...
+2026-07-07 22:13:59.231 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 22:13:59.817 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 22:13:59.837 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 22:13:59.838 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 22:13:59.838 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:116 - Validating Engineered Data Contract...
+2026-07-07 22:13:59.838 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 22:13:59.838 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 22:13:59.846 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 22:13:59.846 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:119 - Saving Processed data...
+2026-07-07 22:14:19.010 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 22:14:19.011 | INFO     | src.core.train_orchestrator:_phase_splitting:134 - Data Splitter - Time Series - started...
+2026-07-07 22:14:19.011 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 22:14:19.012 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 22:14:19.110 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 22:14:19.112 | INFO     | src.core.train_orchestrator:_phase_modeling:153 - --- Starting Model Engineering Phase ---
+2026-07-07 22:14:19.112 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 22:14:19.112 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 22:14:19.112 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 22:14:32.049 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 22:14:32.049 | INFO     | src.core.train_orchestrator:_phase_modeling:158 - Saving Model
+2026-07-07 22:14:32.074 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 22:14:32.074 | INFO     | src.core.train_orchestrator:_phase_evaluation:171 - --- Starting Evaluation Phase ---
+2026-07-07 22:14:32.074 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 22:14:32.124 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 22:14:32.124 | INFO     | src.core.train_orchestrator:_phase_evaluation:175 - Saving Model Metrics
+2026-07-07 22:14:32.125 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 22:14:32.125 | INFO     | src.core.train_orchestrator:_phase_registry:193 - --- Registering Model ---
+2026-07-07 22:14:32.126 | INFO     | src.core.train_orchestrator:run:244 - Pipeline executed successfully.
+2026-07-07 22:44:31.039 | DEBUG    | src.infra.logger:setup_logger:49 - File sink successfully attached at C:\mlops\projects\energy_forecasting\logs\pipeline.log
+2026-07-07 22:44:31.039 | INFO     | __main__:main:25 - System Bootstrapping...
+2026-07-07 22:44:31.040 | INFO     | src.infra.artifact_manager:__init__:35 - ArtifactManager initialized
+2026-07-07 22:44:31.040 | INFO     | src.core.preprocessing_service:__init__:22 - DataPreprocessor initialized
+2026-07-07 22:44:31.040 | INFO     | src.core.feature_engineering:__init__:17 - FeatureEngineer initialized
+2026-07-07 22:44:31.040 | INFO     | src.core.splitter_service:__init__:16 - TimeSeriesSplitter initialized
+2026-07-07 22:44:31.041 | INFO     | src.core.train_orchestrator:run:219 - Configuration loaded successfully.
+2026-07-07 22:44:31.041 | INFO     | src.core.train_orchestrator:run:220 - Pipeline started
+2026-07-07 22:44:31.041 | INFO     | src.core.train_orchestrator:_phase_ingestion:85 - Loading raw data
+2026-07-07 22:44:31.041 | INFO     | src.core.train_orchestrator:_phase_ingestion:88 - Resolved raw data file: data\raw\LD2011_2014.txt
+2026-07-07 22:44:31.042 | INFO     | src.core.ingestion_service:load_raw_energy_data:19 - Starting raw energy data ingestion
+2026-07-07 22:44:31.042 | INFO     | src.infra.data_repository:read_csv:54 - Attempting to read CSV
+2026-07-07 22:44:31.061 | DEBUG    | src.infra.data_repository:read_csv:82 - Resolved dtypes from schema
+2026-07-07 22:44:38.238 | INFO     | src.infra.data_repository:read_csv:99 - CSV ingestion successful
+2026-07-07 22:44:38.889 | INFO     | src.core.ingestion_service:load_raw_energy_data:58 - Ingestion successful
+2026-07-07 22:44:38.889 | INFO     | src.core.train_orchestrator:_phase_ingestion:93 - Validating Raw Data Contract...
+2026-07-07 22:44:38.889 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'object'}]
+2026-07-07 22:44:38.890 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 22:44:38.896 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 22:44:38.896 | INFO     | src.core.train_orchestrator:_phase_preprocessing:103 - Preprocessing started...
+2026-07-07 22:44:38.896 | INFO     | src.core.preprocessing_service:clean_data:30 - Starting data cleaning phase
+2026-07-07 22:44:39.035 | DEBUG    | src.core.preprocessing_service:clean_data:46 - Dropped columns
+2026-07-07 22:45:03.140 | DEBUG    | src.core.preprocessing_service:clean_data:59 - Converted MT_* columns to numeric
+2026-07-07 22:45:03.262 | DEBUG    | src.core.preprocessing_service:clean_data:75 - Applied frequency conversion
+2026-07-07 22:45:03.452 | DEBUG    | src.core.preprocessing_service:clean_data:108 - Applied imputation
+2026-07-07 22:45:03.452 | INFO     | src.core.preprocessing_service:clean_data:115 - Data cleaning completed
+2026-07-07 22:45:03.452 | INFO     | src.core.train_orchestrator:_phase_preprocessing:109 - Validating Preprocessed Data Contract...
+2026-07-07 22:45:03.452 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 22:45:03.452 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 22:45:03.460 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 22:45:03.460 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:122 - Feature Engineering started...
+2026-07-07 22:45:03.460 | INFO     | src.core.feature_engineering:transform:25 - Starting feature engineering
+2026-07-07 22:45:04.075 | DEBUG    | src.core.feature_engineering:transform:44 - Created total_load feature
+2026-07-07 22:45:04.095 | DEBUG    | src.core.feature_engineering:transform:64 - Created time-based features
+2026-07-07 22:45:04.096 | INFO     | src.core.feature_engineering:transform:92 - Feature engineering completed
+2026-07-07 22:45:04.096 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:126 - Validating Engineered Data Contract...
+2026-07-07 22:45:04.096 | DEBUG    | src.core.validator:__init__:47 - Validator initialized.
+Explicit: {'timestamp': 'datetime64[ns]', 'hour_of_day': 'int64', 'day_of_week': 'int64', 'is_weekend': 'int64', 'total_load': 'float64'}Patterns: [{'pattern': '^MT_\\d{3}$', 'type': 'float64'}]
+2026-07-07 22:45:04.096 | INFO     | src.core.validator:validate:54 - Starting contract validation...
+2026-07-07 22:45:04.104 | SUCCESS  | src.core.validator:validate:88 - Contract validation passed.
+2026-07-07 22:45:04.104 | INFO     | src.core.train_orchestrator:_phase_feature_engineering:129 - Saving Processed data...
+2026-07-07 22:45:23.572 | INFO     | src.core.preprocessing_service:save_processed_data:144 - Successfully saved sanitized data
+2026-07-07 22:45:23.572 | INFO     | src.core.train_orchestrator:_phase_splitting:144 - Data Splitter - Time Series - started...
+2026-07-07 22:45:23.572 | INFO     | src.core.splitter_service:split:24 - Starting time-series split
+2026-07-07 22:45:23.573 | DEBUG    | src.core.splitter_service:split:49 - Split boundaries resolved
+2026-07-07 22:45:23.670 | INFO     | src.core.splitter_service:split:78 - Split complete
+2026-07-07 22:45:23.672 | INFO     | src.core.train_orchestrator:_phase_modeling:163 - --- Starting Model Engineering Phase ---
+2026-07-07 22:45:23.672 | INFO     | src.core.modeling:get_worker:141 - Instantiating model worker
+2026-07-07 22:45:23.672 | INFO     | src.core.modeling:__init__:76 - Initialized RandomForestRegressor worker
+2026-07-07 22:45:23.673 | INFO     | src.core.modeling:train:84 - Training RandomForestRegressor
+2026-07-07 22:45:38.050 | INFO     | src.core.modeling:train:92 - RandomForestRegressor training complete
+2026-07-07 22:45:38.050 | INFO     | src.core.train_orchestrator:_phase_modeling:168 - Saving Model
+2026-07-07 22:45:38.074 | INFO     | src.infra.artifact_manager:save_model:50 - Model artifact saved
+2026-07-07 22:45:38.074 | INFO     | src.core.train_orchestrator:_phase_evaluation:181 - --- Starting Evaluation Phase ---
+2026-07-07 22:45:38.075 | INFO     | src.core.evaluator:evaluate:15 - Starting model evaluation
+2026-07-07 22:45:38.128 | INFO     | src.core.evaluator:evaluate:29 - Evaluation complete
+2026-07-07 22:45:38.128 | INFO     | src.core.train_orchestrator:_phase_evaluation:185 - Saving Model Metrics
+2026-07-07 22:45:38.129 | INFO     | src.infra.artifact_manager:save_metrics:100 - Metrics artifact saved
+2026-07-07 22:45:38.129 | INFO     | src.core.train_orchestrator:_phase_registry:203 - --- Registering Model ---
+2026-07-07 22:45:38.131 | INFO     | src.core.train_orchestrator:run:254 - Pipeline executed successfully.

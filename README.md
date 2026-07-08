@@ -1,14 +1,8 @@
-Absolutely, Brian — here is a **fully rewritten, production‑grade GitHub README**, formatted in clean GitHub Markdown, aligned with your architecture, and updated to reflect everything we completed today.
-
-This version is polished, senior‑level, and ready to paste directly into your repo.
-
----
-
 # **Modular AutoML Energy Forecasting System**
 
-`https://img.shields.io/badge/python-3.9+-blue`
-`https://img.shields.io/badge/MLOps-Production_Grade-orange`
-`https://img.shields.io/badge/Architecture-Service_Oriented-green`
+![Python](https://img.shields.io/badge/python-3.9+-blue)
+![MLOps](https://img.shields.io/badge/MLOps-Production_Grade-orange)
+![Architecture](https://img.shields.io/badge/Architecture-Service_Oriented-green)
 
 A fully modular, configuration‑driven MLOps framework for **energy‑consumption forecasting**, built around strict engineering laws that eliminate hidden technical debt and enforce reproducibility, portability, and maintainability.
 
