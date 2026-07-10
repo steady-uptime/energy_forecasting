@@ -45,3 +45,10 @@ class ModelTrainingError(PipelineError):
 class ArtifactError(PipelineError):
     """Raised when saving or loading artifacts fails."""
     pass
+
+
+class MonitoringError(PipelineError):
+    """
+    Raised when monitoring pipeline fails.
+    """
+    pass

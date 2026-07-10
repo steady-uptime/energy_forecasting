@@ -293,18 +293,33 @@ graph TD
 - [x] Model Worker Factory  
 - [x] Modular training pipeline  
 - [x] Structured logging with run_id  
-- [x] **Training Orchestrator** (new)  
-- [x] **Pipeline Metadata System** (new)  
-- [x] **Config Snapshotting** (new)  
-- [x] **Model Registry with versioning + champion pointer** (new)  
+- [x] Training Orchestrator  
+- [x] Pipeline metadata system  
+- [x] Config snapshotting  
+- [x] Model Registry with versioning + champion pointer  
+- [x] **Monitoring Pipeline (drift detection)**  
+- [x] **Monitoring reports + drift thresholds**  
+- [x] **Full data‑path reuse (ingestion → preprocessing → features → split)**  
+- [x] **Champion model loading + baseline metrics**  
+- [x] **Artifact‑managed model loading**  
+- [x] **Production‑grade dependency injection across pipelines**
 
 ### **🧭 In Progress / Planned**
 
-- [ ] Drift monitoring service  
-- [ ] Automated retraining pipeline  
-- [ ] FastAPI deployment  
-- [ ] Dockerization  
-- [ ] Model comparison engine  
+- [ ] **Inference API (FastAPI)**  
+  Load champion from registry → expose `/predict` → log requests → optional live‑data feed.
+- [ ] **Retrain Pipeline**  
+  Triggered by drift → reuses TrainingOrchestrator → updates registry champion.
+- [ ] **Alert/Trigger System**  
+  Reads monitoring report → fires retrain pipeline → optional Slack/email/webhook.
+- [ ] **Experiment Tracker (Unified View)**  
+  Consolidated run history, metrics, configs, and registry versions.
+- [ ] **Secrets / Environment Management**  
+  `.env` or environment‑specific overrides for production deployment.
+- [ ] **Dockerization**  
+  Containerized inference + monitoring + retraining pipelines.
+- [ ] **Model Comparison Engine**  
+  Compare champion vs candidate models across multiple metrics.
 
 ---
 

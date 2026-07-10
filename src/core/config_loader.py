@@ -93,6 +93,17 @@ class LoggingConfig:
     retention_days: str
     format: str = "{timestamp} | {level} | {message} | {module}"
 
+@dataclass
+class MonitoringConfig:
+    live_data_path: str
+    primary_metric: str
+    drift_threshold: float
+    report_path: str
+
+    thresholds: dict | None = None
+    reporting: dict | None = None
+
+
 @dataclass(frozen=True)
 class AppConfig:
     project_name: str
@@ -105,6 +116,7 @@ class AppConfig:
     training: TrainingConfig
     artifacts: ArtifactConfig
     logging: LoggingConfig
+    monitoring: MonitoringConfig
     project_root: str
 
     def validate(self):
@@ -177,6 +189,7 @@ class ConfigLoader:
                 training=TrainingConfig(**combined_raw_data["training"]),
                 artifacts=ArtifactConfig(**combined_raw_data["artifacts"]),
                 logging=LoggingConfig(**combined_raw_data["logging"]),
+                monitoring = MonitoringConfig(**combined_raw_data["monitoring"]),
                 project_root=combined_raw_data["project_root"]
             )
 

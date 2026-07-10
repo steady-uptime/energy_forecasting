@@ -1,5 +1,6 @@
 # /src/core/registry.py
 from dataclasses import dataclass, asdict
+from src.core.exceptions import ArtifactError
 from datetime import datetime, UTC
 from pathlib import Path
 import json
@@ -36,6 +37,26 @@ class ModelRegistry:
         if not self.records_file.exists():
             with self.records_file.open("w") as f:
                 json.dump([], f)
+
+    def load_champion(self):
+        """
+        Load the current champion model record.
+        """
+        if not self.champion_file.exists():
+            raise ArtifactError(
+                "Champion model not found. Train a model before running monitoring.",
+                context={"champion_file": str(self.champion_file)}
+            )
+
+        try:
+            with self.champion_file.open("r") as f:
+                return json.load(f)
+
+        except Exception as e:
+            raise ArtifactError(
+                "Failed to load champion model",
+                context={"champion_file": str(self.champion_file)}
+            ) from e
 
     def _load_records(self):
         with self.records_file.open("r") as f:

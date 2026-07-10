@@ -34,6 +34,96 @@ class ArtifactManager:
             project_root=str(self.project_root)
         ).info("ArtifactManager initialized")
 
+    def save_drift_report(
+        self,
+        drift_detected: bool,
+        baseline: dict,
+        live: dict,
+        model_version: str,
+        run_id: str
+    ):
+        """
+        Persist a drift report for monitoring.
+        """
+        log = logger.bind(
+            module="ArtifactManager",
+            run_id=run_id,
+            model_version=model_version
+        )
+
+        try:
+            # -----------------------------------------------------
+            # Resolve Path
+            # -----------------------------------------------------
+            drift_dir = Path(self.artifact_cfg.reports_path) / "drift"
+            drift_dir.mkdir(parents=True, exist_ok=True)
+
+            report_path = drift_dir / f"drift_report_{run_id}.json"
+
+            # -----------------------------------------------------
+            # Build Report Structure
+            # -----------------------------------------------------
+            report = {
+                "run_id": run_id,
+                "model_version": model_version,
+                "drift_detected": drift_detected,
+                "baseline_metrics": baseline,
+                "live_metrics": live,
+            }
+
+            # -----------------------------------------------------
+            # Write Report
+            # -----------------------------------------------------
+            with report_path.open("w") as f:
+                json.dump(report, f, indent=2)
+
+            log.info(f"Drift report saved: {report_path}")
+
+            return report_path
+
+        except Exception as e:
+            log.error(f"Failed to save drift report: {e}")
+            raise ArtifactError(
+                "Failed to save drift report",
+                context={"run_id": run_id, "model_version": model_version}
+            ) from e
+
+    def load_model(self, model_path: str):
+        """
+        Load a serialized model artifact from disk.
+        """
+        try:
+            path = Path(model_path)
+
+            if not path.exists():
+                raise ArtifactError(
+                    "Model file not found",
+                    context={"model_path": model_path}
+                )
+
+            model = joblib.load(path)
+
+            logger.bind(
+                module="ArtifactManager",
+                run_id=self.run_id,
+                model_path=model_path
+            ).info("Model artifact loaded")
+
+            return model
+
+        except Exception as e:
+            logger.bind(
+                module="ArtifactManager",
+                run_id=self.run_id,
+                error=str(e),
+                model_path=model_path
+            ).error("Model artifact load failure")
+
+            raise ArtifactError(
+                "Failed to load model artifact",
+                context={"model_path": model_path}
+            ) from e
+
     def save_model(self, model: Any, model_name: str) -> Path:
         """Serializes the model weights to the filesystem."""
         save_path = self.models_dir / f"{model_name}.joblib"

@@ -1,0 +1,14 @@
+# configs/monitoring.yaml
+monitoring:
+  live_data_path: "data/raw/live_data.csv"
+  primary_metric: "rmse"
+  drift_threshold: 0.10     # 10% relative increase allowed
+  report_path: "artifacts/monitoring"
+
+  thresholds:
+    rmse_ratio: 1.10
+    mse_ratio: 1.10
+
+  reporting:
+    drift_report_dir: "artifacts/reports/drift"
+
