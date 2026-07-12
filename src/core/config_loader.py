@@ -51,21 +51,33 @@ class FeaturesConfig:
     time_features: Dict[str, bool]
 
 @dataclass(frozen=True)
-class ModelConfig:
-    name: str
-    model_type: str
-    params: Dict[str, Any]
+class HPOConfig:
+    strategy: str
+    parameters: Dict[str, Any]
 
 @dataclass(frozen=True)
+class ModelConfig:
+    name: str            # Identity (Registry)
+    model_kind: str      # Architecture (Factory)
+    params: Dict[str, Any] # Static Hyperparameters
+    hpo: Optional[HPOConfig] = None # Dynamic Hyperparameters
+    dry_run: bool = False
+    
+@dataclass(frozen=True)
 class TrainingConfig:
-    learning_rate: float
-    batch_size: int
-    epochs: int
+    # To support both Deep Learning (LR/Batch) and ML (Trees), 
+    # we keep these but treat them as optional or part of a generic dict
+    learning_rate: Optional[float] = None
+    batch_size: Optional[int] = None
+    epochs: Optional[int] = None
+    # Add a generic dict for any other model-specific training hyperparams
+    extra_params: Dict[str, Any] = None 
 
     def validate(self):
-        if not (0 < self.learning_rate < 1):
+        # Only validate if the values are actually provided
+        if self.learning_rate is not None and not (0 < self.learning_rate < 1):
             raise ValueError(f"TrainingConfig: Invalid learning_rate ({self.learning_rate}).")
-        if self.batch_size <= 0:
+        if self.batch_size is not None and self.batch_size <= 0:
             raise ValueError(f"TrainingConfig: Invalid batch_size ({self.batch_size}).")
 
 @dataclass(frozen=True)
@@ -137,11 +149,12 @@ class ConfigLoader:
     def __new__(cls) -> "ConfigLoader":
         if cls._instance is None:
             cls._instance = super(ConfigLoader, cls).__new__(cls)
+            # Default behavior: initialize with no arguments (loads all configs)
             cls._initialize_config()
         return cls._instance
 
     @classmethod
-    def _initialize_config(cls) -> None:
+    def _initialize_config(cls, path: Optional[str] = None) -> None:
         # Law #1 & #3: Dynamic root calculation
         if cls.project_root is None:
             cls.project_root = Path(__file__).resolve().parent.parent.parent
@@ -149,20 +162,22 @@ class ConfigLoader:
         logger.info(f"System: Initializing Configuration from {cls.project_root}/configs")
 
         try:
-            # 1. Load all yaml files in the configs directory
-            config_dir = cls.project_root / "configs"
+            # Determine which directory/file to load from
+            if path:
+                config_path = Path(path)
+                logger.info(f"System: Loading specific configuration from {config_path}")
+                source_files = [config_path] + list(cls.project_root / "configs".glob("*.yaml"))
+            else:
+                source_files = list((cls.project_root / "configs").glob("*.yaml"))
+
             combined_raw_data = {}
 
-            for config_file in config_dir.glob("*.yaml"):
-                # Skip the env_mapping logic if it's in config.yaml, 
-                # but we need to handle it specially.
-                with open(config_file, "r") as f:
-                    file_content = yaml.safe_load(f)
-                    if file_content:
-                        # Merge content into a master dictionary
-                        # We use a flat merge here, but you can adjust logic 
-                        # if keys overlap significantly.
-                        combined_raw_data.update(file_content)
+            for config_file in source_files:
+                if config_file.exists():
+                    with open(config_file, "r") as f:
+                        file_content = yaml.safe_load(f)
+                        if file_content:
+                            combined_raw_data.update(file_content)
 
             # 2. Inject Project Root
             combined_raw_data["project_root"] = (cls.project_root)
@@ -172,9 +187,6 @@ class ConfigLoader:
                 combined_raw_data = cls._apply_env_overrides(combined_raw_data)
 
             # 4. Map to Dataclasses
-            # Note: Because your YAMLs have nested keys (like 'data:', 'model:'),
-            # we extract those specifically to pass into the dataclasses.
-            
             cls._config = AppConfig(
                 project_name=combined_raw_data["project_name"],
                 version=combined_raw_data["version"],
@@ -222,9 +234,17 @@ class ConfigLoader:
         return raw_data
 
     @classmethod
-    def get_config(cls) -> AppConfig:
+    def load(cls, path: Optional[str] = None) -> AppConfig:
+        """Public API to load configuration. Supports optional path override."""
         if cls._config is None:
-            ConfigLoader() 
+            cls._initialize_config(path)
+        return cls._config
+
+    @classmethod
+    def get_config(cls) -> AppConfig:
+        """Public API to retrieve the global config instance."""
+        if cls._config is None:
+            cls._initialize_config()
         return cls._config
 
 # Global instance

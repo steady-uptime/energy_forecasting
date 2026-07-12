@@ -5,26 +5,24 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from src.core.exceptions import ModelTrainingError
 from loguru import logger
 
-# --- Abstraction Layer ---
 class BaseModelWorker(ABC):
     @abstractmethod
     def train(self, X_train: Any, y_train: Any) -> Any:
         pass
 
-# --- Concrete Implementations ---
-
 class SklearnRandomForestClassifierWorker(BaseModelWorker):
     def __init__(self, model_cfg, run_id: str):
         self.model_cfg = model_cfg
         self.run_id = run_id
+        self.model_kind = model_cfg.model_kind
         self.model = RandomForestClassifier(**model_cfg.params)
 
         logger.bind(
             module="ModelWorker",
             run_id=self.run_id,
-            model_type="RandomForestClassifier",
+            model_kind=self.model_kind,
             hyperparameters=model_cfg.params
-        ).info("Initialized RandomForestClassifier worker")
+        ).info(f"Initialized {self.model_kind} worker")
 
     def train(self, X_train, y_train):
         logger.bind(
@@ -32,48 +30,34 @@ class SklearnRandomForestClassifierWorker(BaseModelWorker):
             run_id=self.run_id,
             X_shape=X_train.shape,
             y_shape=y_train.shape
-        ).info("Training RandomForestClassifier")
+        ).info(f"Training {self.model_kind}")
 
         try:
             self.model.fit(X_train, y_train)
-
-            logger.bind(
-                module="ModelWorker",
-                run_id=self.run_id
-            ).info("RandomForestClassifier training complete")
-
+            logger.bind(module="ModelWorker", run_id=self.run_id).info(f"{self.model_kind} training complete")
             return self.model
-
         except Exception as e:
-            logger.bind(
-                module="ModelWorker",
-                run_id=self.run_id,
-                error=str(e)
-            ).error("RandomForestClassifier training failure")
-
-            raise ModelTrainingError(
-                "Model training failed",
-                context={
-                    "model_type": "RandomForestClassifier",
-                    "hyperparameters": self.model_cfg.params,
-                    "X_shape": X_train.shape,
-                    "y_shape": y_train.shape
-                }
-            ) from e
-
+            logger.bind(module="ModelWorker", run_id=self.run_id, error=str(e)).error(f"{self.model_kind} training failure")
+            raise ModelTrainingError("Model training failed", context={
+                "model_kind": self.model_kind,
+                "hyperparameters": self.model_cfg.params,
+                "X_shape": X_train.shape,
+                "y_shape": y_train.shape
+            }) from e
 
 class SklearnRandomForestRegressorWorker(BaseModelWorker):
     def __init__(self, model_cfg, run_id: str):
         self.model_cfg = model_cfg
         self.run_id = run_id
+        self.model_kind = model_cfg.model_kind
         self.model = RandomForestRegressor(**model_cfg.params)
 
         logger.bind(
             module="ModelWorker",
             run_id=self.run_id,
-            model_type="RandomForestRegressor",
+            model_kind=self.model_kind,
             hyperparameters=model_cfg.params
-        ).info("Initialized RandomForestRegressor worker")
+        ).info(f"Initialized {self.model_kind} worker")
 
     def train(self, X_train, y_train):
         logger.bind(
@@ -81,42 +65,22 @@ class SklearnRandomForestRegressorWorker(BaseModelWorker):
             run_id=self.run_id,
             X_shape=X_train.shape,
             y_shape=y_train.shape
-        ).info("Training RandomForestRegressor")
+        ).info(f"Training {self.model_kind}")
 
         try:
             self.model.fit(X_train, y_train)
-
-            logger.bind(
-                module="ModelWorker",
-                run_id=self.run_id
-            ).info("RandomForestRegressor training complete")
-
+            logger.bind(module="ModelWorker", run_id=self.run_id).info(f"{self.model_kind} training complete")
             return self.model
-
         except Exception as e:
-            logger.bind(
-                module="ModelWorker",
-                run_id=self.run_id,
-                error=str(e)
-            ).error("RandomForestRegressor training failure")
+            logger.bind(module="ModelWorker", run_id=self.run_id, error=str(e)).error(f"{self.model_kind} training failure")
+            raise ModelTrainingError("Model training failed", context={
+                "model_kind": self.model_kind,
+                "hyperparameters": self.model_cfg.params,
+                "X_shape": X_train.shape,
+                "y_shape": y_train.shape
+            }) from e
 
-            raise ModelTrainingError(
-                "Model training failed",
-                context={
-                    "model_type": "RandomForestRegressor",
-                    "hyperparameters": self.model_cfg.params,
-                    "X_shape": X_train.shape,
-                    "y_shape": y_train.shape
-                }
-            ) from e
-
-
-# --- Factory Pattern ---
 class ModelWorkerFactory:
-    """
-    Handles the instantiation of model workers based on configuration.
-    This decouples the Orchestrator from specific Model implementations.
-    """
     _workers = {
         "random_forest_classifier": SklearnRandomForestClassifierWorker,
         "random_forest_regressor": SklearnRandomForestRegressorWorker,
@@ -124,20 +88,24 @@ class ModelWorkerFactory:
 
     @staticmethod
     def get_worker(model_cfg, run_id: str) -> BaseModelWorker:
-        model_type = model_cfg.model_type
+        # --- DRY RUN LOGIC START ---
+        # Use getattr to safely check if dry_run exists on the config object
+        is_dry_run = getattr(model_cfg, "dry_run", False)
+        
+        if is_dry_run:
+            logger.bind(module="ModelWorkerFactory", run_id=run_id).info("Dry run mode detected. Injecting MockModelWorker.")
+            from src.core.mock_worker import MockModelWorker # Local import to avoid circularity
+            return MockModelWorker(model_cfg, run_id)
+        # --- DRY RUN LOGIC END ---
 
-        worker_class = ModelWorkerFactory._workers.get(model_type)
+        model_kind = model_cfg.model_kind
+        worker_class = ModelWorkerFactory._workers.get(model_kind)
 
         if not worker_class:
             raise ModelTrainingError(
-                f"Unsupported model_type: {model_type}",
+                f"Unsupported model kind: {model_kind}",
                 context={"available_types": list(ModelWorkerFactory._workers.keys())}
             )
 
-        logger.bind(
-            module="ModelWorkerFactory",
-            run_id=run_id,
-            model_type=model_type
-        ).info("Instantiating model worker")
-
+        logger.bind(module="ModelWorkerFactory", run_id=run_id, model_kind=model_kind).info(f"Instantiating {model_kind} worker")
         return worker_class(model_cfg, run_id)
