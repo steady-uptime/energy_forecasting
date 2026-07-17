@@ -34,10 +34,6 @@ class DataConfig:
             raise ValueError("DataConfig: target_column must not be empty.")
         if not self.feature_column_pattern:
             raise ValueError("DataConfig: feature_column_pattern must be defined.")
-        if self.raw_columns is None:
-            raise ValueError("DataConfig: raw_columns must be defined in data.yaml.")
-        
-        # Optional: Add validation for schemas to ensure they aren't empty
         if not self.raw_schema:
             raise ValueError("DataConfig: raw_schema must be defined.")
         if not self.preprocessed_schema:
@@ -115,6 +111,11 @@ class MonitoringConfig:
     thresholds: dict | None = None
     reporting: dict | None = None
 
+@dataclass(frozen=True)
+class DebugConfig:
+    enable_debug_mode: bool = False
+    raw_data_path: Optional[str] = None
+    description: Optional[str] = None
 
 @dataclass(frozen=True)
 class AppConfig:
@@ -130,6 +131,7 @@ class AppConfig:
     logging: LoggingConfig
     monitoring: MonitoringConfig
     project_root: str
+    debug: DebugConfig = DebugConfig()
 
     def validate(self):
         self.data.validate()
@@ -202,7 +204,8 @@ class ConfigLoader:
                 artifacts=ArtifactConfig(**combined_raw_data["artifacts"]),
                 logging=LoggingConfig(**combined_raw_data["logging"]),
                 monitoring = MonitoringConfig(**combined_raw_data["monitoring"]),
-                project_root=combined_raw_data["project_root"]
+                project_root=combined_raw_data["project_root"],
+                debug=DebugConfig(**combined_raw_data.get("debug", {}))
             )
 
             # 5. Contract Validation

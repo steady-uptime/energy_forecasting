@@ -87,14 +87,19 @@ class TrainingOrchestrator:
         raw_file = Path(self.config.paths.raw_data) / self.artifacts_cfg.input_file
         log.info(f"Resolved raw data file: {raw_file}")
 
+        # 1. Load raw CSV directly from the repository
+        raw_df = self.repo.read_csv(str(raw_file), sep=self.data_cfg.csv_separator)
+
+        # 2. Validate raw schema BEFORE ingestion renaming
+        log.info("Validating Raw Data Contract...")
+        DataValidator(self.data_cfg.raw_schema).validate(raw_df)
+
+        # 3. Now run ingestion (renaming + timestamp parsing)
         raw_data = self.ingestion.load_raw_energy_data(str(raw_file))
         self.artifacts["raw"] = raw_data
 
-        log.info("Validating Raw Data Contract...")
-        DataValidator(self.data_cfg.raw_schema).validate(raw_data)
-
         return raw_data
-
+    
     # -------------------------
     # Phase 2: Preprocessing
     # -------------------------

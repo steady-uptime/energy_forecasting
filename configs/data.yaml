@@ -14,10 +14,7 @@ data:
   # INGESTION CONFIG
   # -----------------------------
   csv_separator: ";"
-  timestamp_precision: "ns"
-
-  raw_columns:
-    timestamp: "Unnamed: 0"
+  timestamp_precision: "us"
 
   # -----------------------------
   # TARGET & FEATURES
@@ -62,10 +59,6 @@ data:
     imputation:
       strategy: "forward_fill"
 
-    # Scaling
-    scaling:
-      method: "standard"
-
   # -----------------------------
   # SCHEMA VALIDATION (The Gatekeeper Contracts)
   # -----------------------------
@@ -73,27 +66,22 @@ data:
 
   # Contract 1: The Raw State (Exactly as read from CSV)
   raw_schema:
-    - column: "timestamp"
-      type: "datetime64[ns]"
+    - column: "Unnamed: 0"
+      type: "object"
     - column_pattern: "^MT_\\d{3}$"
-      type: "object"  # Raw CSV columns often read as objects before numeric conversion
+      type: "object"
 
   # Contract 2: The Sanitized State (Post-Preprocessing)
   # All MT_* columns are now numeric; timestamp is preserved for the next step.
   preprocessed_schema:
     - column: "timestamp"
-      type: "datetime64[ns]"
+      type: "datetime64[us]"
     - column_pattern: "^MT_\\d{3}$"
       type: "float64"
 
-  # Contract 3: The Feature Matrix (Post-Engineering)
-  # Note: 'timestamp' is dropped because it's non-numeric. 
-  # Note: 'total_load' is NOT here because it is the target, not a feature.
   engineered_schema:
     - column: "timestamp"
-      type: "datetime64[ns]"
-    - column_pattern: "^MT_\\d{3}$"
-      type: "float64"
+      type: "datetime64[us]"
     - column: "hour_of_day"
       type: "int64"
     - column: "day_of_week"

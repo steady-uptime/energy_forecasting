@@ -46,12 +46,43 @@ class DataPreprocessor:
             ).debug("Dropped columns")
 
             # -----------------------------
+            # Timestamp normalization
+            # -----------------------------
+            # Assume first column is the timestamp, as in ingestion
+            ts_col = df.columns[0]
+
+            # Rename to canonical name expected by FeatureEngineer
+            if ts_col != "timestamp":
+                df = df.rename(columns={ts_col: "timestamp"})
+
+            # Parse to datetime
+            df["timestamp"] = pd.to_datetime(df["timestamp"], errors="raise")
+
+            logger.bind(
+                module="DataPreprocessor",
+                run_id=self.run_id,
+                timestamp_column="timestamp",
+                dtype=str(df["timestamp"].dtype)
+            ).debug("Normalized timestamp column")
+
+            # -----------------------------
             # Convert MT_* columns to numeric
             # -----------------------------
             if self.rules.get("convert_to_numeric", False):
                 mt_cols = df.filter(regex=r"^MT_\d{3}$").columns
+            
+                # Normalize decimal commas
+                df[mt_cols] = df[mt_cols].replace({",": "."}, regex=True)
+            
+                logger.bind(
+                    module="DataPreprocessor",
+                    run_id=self.run_id,
+                    columns=list(mt_cols)
+                ).debug("Normalized decimal commas in MT_* columns")
+            
+                # Convert to numeric
                 df[mt_cols] = df[mt_cols].apply(pd.to_numeric, errors="coerce")
-
+            
                 logger.bind(
                     module="DataPreprocessor",
                     run_id=self.run_id,
@@ -65,7 +96,7 @@ class DataPreprocessor:
             if freq_cfg.get("enabled", False):
                 factor = freq_cfg.get("factor", 1.0)
                 mt_cols = df.filter(regex=r"^MT_\d{3}$").columns
-                df[mt_cols] = df[mt_cols] * factor
+                df[mt_cols] = df[mt_cols] * factor # divides the value by 4 ... value x 0.25
 
                 logger.bind(
                     module="DataPreprocessor",

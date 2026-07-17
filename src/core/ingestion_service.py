@@ -17,38 +17,33 @@ class IngestionService:
             run_id=self.run_id,
             filename=filename
         ).info("Starting raw energy data ingestion")
-
+    
         try:
             # 1. Fetch data via Infrastructure
             df = self.repo.read_csv(filename, sep=self.data_cfg.csv_separator)
-
+    
             # 2. Immutability: Work on a copy
             df = df.copy()
-
-            # 3. Config-Driven Renaming
+    
+            # 3. Dynamic Timestamp Detection
+            # The real LD2011_2014.txt always has the timestamp in the first column ("Unnamed: 0")
+            timestamp_col = df.columns[0]
             target_col = "timestamp"
-            source_col = self.data_cfg.raw_columns["timestamp"]
-
-            if source_col in df.columns:
-                df = df.rename(columns={source_col: target_col})
-            else:
-                logger.bind(
-                    module="IngestionService",
-                    run_id=self.run_id,
-                    missing_column=source_col
-                ).warning("Source timestamp column missing")
-
-                raise DataValidationError(
-                    f"Required timestamp column '{source_col}' missing",
-                    context={"expected_column": source_col, "columns": list(df.columns)}
-                )
-
+    
+            logger.bind(
+                module="IngestionService",
+                run_id=self.run_id,
+                detected_timestamp_col=timestamp_col
+            ).info("Detected timestamp column")
+    
+            df = df.rename(columns={timestamp_col: target_col})
+    
             # 4. Domain Logic: Type Casting
-            df[target_col] = pd.to_datetime(df[target_col])
-
+            df[target_col] = pd.to_datetime(df[target_col], errors="raise")
+    
             precision = self.data_cfg.timestamp_precision
             df[target_col] = df[target_col].astype(f"datetime64[{precision}]")
-
+    
             logger.bind(
                 module="IngestionService",
                 run_id=self.run_id,
@@ -56,16 +51,16 @@ class IngestionService:
                 cols=len(df.columns),
                 precision=precision
             ).info("Ingestion successful")
-
+    
             return df
-
+    
         except Exception as e:
             logger.bind(
                 module="IngestionService",
                 run_id=self.run_id,
                 error=str(e)
             ).error("Ingestion failure")
-
+    
             raise IngestionError(
                 "Failed during ingestion service",
                 context={

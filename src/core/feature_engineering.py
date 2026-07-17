@@ -67,9 +67,11 @@ class FeatureEngineer:
             # Final Contract Enforcement
             # -------------------------------------------------
             keep_cols = df.select_dtypes(include=["number"]).columns.tolist()
+            # Drop MT_* columns (they are no longer needed)
+            keep_cols = [c for c in keep_cols if not c.startswith("MT_")]
 
             if "timestamp" in df.columns:
-                keep_cols.append("timestamp")
+                keep_cols.insert(0, "timestamp")
 
             if self.target_column in df.columns and self.target_column not in keep_cols:
                 keep_cols.append(self.target_column)

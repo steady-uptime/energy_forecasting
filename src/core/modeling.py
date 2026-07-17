@@ -88,16 +88,6 @@ class ModelWorkerFactory:
 
     @staticmethod
     def get_worker(model_cfg, run_id: str) -> BaseModelWorker:
-        # --- DRY RUN LOGIC START ---
-        # Use getattr to safely check if dry_run exists on the config object
-        is_dry_run = getattr(model_cfg, "dry_run", False)
-        
-        if is_dry_run:
-            logger.bind(module="ModelWorkerFactory", run_id=run_id).info("Dry run mode detected. Injecting MockModelWorker.")
-            from src.core.mock_worker import MockModelWorker # Local import to avoid circularity
-            return MockModelWorker(model_cfg, run_id)
-        # --- DRY RUN LOGIC END ---
-
         model_kind = model_cfg.model_kind
         worker_class = ModelWorkerFactory._workers.get(model_kind)
 

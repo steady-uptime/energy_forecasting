@@ -1,0 +1,6 @@
+# configs/debug.yaml
+debug:
+  enable_debug_mode: true
+  raw_data_path: "data/raw/LD2011_2014.txt"
+#  raw_data_path: "data/raw/test_raw_data.txt"
+  description: "Synthetic test dataset for ingestion and preprocessing diagnostics"
