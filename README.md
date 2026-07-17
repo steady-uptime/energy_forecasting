@@ -285,41 +285,42 @@ graph TD
 
 ## **📈 Project Milestones & Roadmap**
 
-### **✅ Completed**
+### **✅ Completed: Architectural Foundations**
 
-- [x] Singleton configuration loader  
-- [x] Service‑oriented architecture  
-- [x] Data validation contracts  
-- [x] Model Worker Factory  
-- [x] Modular training pipeline  
-- [x] Structured logging with run_id  
-- [x] Training Orchestrator  
-- [x] Pipeline metadata system  
-- [x] Config snapshotting  
-- [x] Model Registry with versioning + champion pointer  
-- [x] **Monitoring Pipeline (drift detection)**  
-- [x] **Monitoring reports + drift thresholds**  
-- [x] **Full data‑path reuse (ingestion → preprocessing → features → split)**  
-- [x] **Champion model loading + baseline metrics**  
-- [x] **Artifact‑managed model loading**  
-- [x] **Production‑grade dependency injection across pipelines**
+#### **🏗️ System Architecture & Engineering**
+- [x] **Service-Oriented Architecture:** Decoupled logic into independent, testable modules with strict input/output contracts.
+- [x] **Production-Grade Dependency Injection:** Services are injected into Orchestrators via constructors to ensure loose coupling and high testability.
+- [x] **Singleton Configuration Management:** Centralized configuration with environment variable overrides and global state consistency.
+- [x] **Data Validation Contracts:** Enforced schema verification at every stage (Raw → Sanitized → Engineered) using a centralized validator.
+- [x] **Portability-First Design:** Zero hardcoding; all paths and resources are dynamically resolved via a project-root-aware configuration loader.
+
+#### **🗄️ Data Engineering & Orchestration**
+- [x] **DataOrchestrator Pattern:** Consolidated ingestion, preprocessing, and feature engineering into a single, atomic data engineering lifecycle.
+- [x] **Idempotent Data Pipelines:** Designed to handle batch processing with immutable read-only data repositories.
+- [x] **TimeSeries-Aware Splitting:** Custom logic for handling temporal dependencies in energy consumption data.
+
+#### **🤖 Model Lifecycle & Governance**
+- [x] **Model Worker Factory:** Abstracted model instantiation to support multi-model experimentation and easy scaling.
+- [x] **Model Registry & Versioning:** Automated tracking of model URIs, performance metrics, and "Champion" model pointers.
+- [x] **Configuration Snapshotting:** Automatic persistence of the exact hyperparameter and configuration state for every production run.
+- [x] **Pipeline Metadata System:** Structured JSON tracking of execution status, phase durations, and artifact paths.
+
+#### **👁️ Observability & Quality Assurance**
+- [x] **Structured Logging:** Contextual logging with unique `run_id` tracking across all services.
+- [x] **Drift Detection Pipeline:** Automated monitoring for data and concept drift.
+- [x] **Automated Reporting:** Generation of drift thresholds and performance summaries.
 
 ### **🧭 In Progress / Planned**
 
-- [ ] **Inference API (FastAPI)**  
-  Load champion from registry → expose `/predict` → log requests → optional live‑data feed.
-- [ ] **Retrain Pipeline**  
-  Triggered by drift → reuses TrainingOrchestrator → updates registry champion.
-- [ ] **Alert/Trigger System**  
-  Reads monitoring report → fires retrain pipeline → optional Slack/email/webhook.
-- [ ] **Experiment Tracker (Unified View)**  
-  Consolidated run history, metrics, configs, and registry versions.
-- [ ] **Secrets / Environment Management**  
-  `.env` or environment‑specific overrides for production deployment.
-- [ ] **Dockerization**  
-  Containerized inference + monitoring + retraining pipelines.
-- [ ] **Model Comparison Engine**  
-  Compare champion vs candidate models across multiple metrics.
+#### **🚀 Deployment & Scale**
+- [ ] **Inference API (FastAPI):** Production-ready endpoint to serve the Champion model with request logging.
+- [ ] **Containerization (Docker/K8s):** Standardized environment via Dockerfiles and Kubernetes manifests.
+- [ ] **Secrets Management:** Integration with environment-specific secrets for production deployment.
+
+#### **🔄 Lifecycle Automation**
+- [ ] **Automated Retraining:** Triggered by drift detection events to refresh the Champion model.
+- [ ] **Experiment Tracker (Unified View):** A dashboard/UI for consolidated metrics, run history, and artifact links.
+- [ ] **Model Comparison Engine:** Automated head-to-head comparison of candidate models against the current Champion.
 
 ---
 

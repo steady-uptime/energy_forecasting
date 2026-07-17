@@ -15,52 +15,73 @@ from src.core.evaluator import ModelEvaluator
 from src.core.train_orchestrator import TrainingOrchestrator
 from src.core.model_registry import ModelRegistry
 from src.core.exceptions import PipelineError
+from src.core.data_orchestrator import DataOrchestrator
 from loguru import logger
 
+# Initialize Logging
 run_id = uuid.uuid4().hex
 setup_logger(config.logging, Path(config.project_root))
 
 def main():
     try:
         logger.bind(run_id=run_id).info("System Bootstrapping...")
-
         project_root = Path(config.project_root)
 
-        # Infrastructure Layer
+        # 1. Infrastructure Layer
+        # Resolving paths via config and project_root to maintain Portability
         repo = DataRepository(project_root, config.data, run_id=run_id)
+        
         artifact_manager = ArtifactManager(
             artifact_cfg=config.artifacts,
-            project_root=config.paths.project_root,
+            project_root=project_root,
             run_id=run_id
         )
 
-        # Service Layer
+        registry = ModelRegistry(
+            registry_dir=project_root / config.artifacts.metadata_path / "registry"
+        )
+
+        # 2. Data Engineering Services (Sub-components of DataOrchestrator)
         ingestion = IngestionService(repo, config.data, run_id=run_id)
+        
         preprocessor = DataPreprocessor(
             rules=config.data.preprocessing,
             processed_path=project_root / config.paths.processed_data,
             run_id=run_id
         )
+        
         engineer = FeatureEngineer(
             rules=config.features,
             target_column=config.data.target_column,
             run_id=run_id
         )
+
+        # 3. Data Orchestration Layer
+        # This encapsulates the Ingestion + Preprocessing + Engineering flow
+        data_orchestrator = DataOrchestrator(
+            repo=repo,
+            ingestion=ingestion,
+            preprocessor=preprocessor,
+            engineer=engineer,
+            data_cfg=config.data,
+            artifacts_cfg=config.artifacts,
+            run_id=run_id,
+            project_root=project_root
+        )
+
+        # 4. Model Engineering Services
         splitter = TimeSeriesSplitter(
             split_cfg=config.data.split_config,
             target_column=config.data.target_column,
             run_id=run_id
         )
-        registry = ModelRegistry(
-            registry_dir=Path(config.artifacts.metadata_path) / "registry"
-        )
 
+        # 5. Main Training Orchestrator
+        # Dependency Injection: Injecting the consolidated DataOrchestrator
         orchestrator = TrainingOrchestrator(
             config=config,
             repo=repo,
-            ingestion=ingestion,
-            preprocessor=preprocessor,
-            engineer=engineer,
+            data_orchestrator=data_orchestrator, 
             splitter=splitter,
             artifact_manager=artifact_manager,
             model_factory=ModelWorkerFactory,
@@ -69,6 +90,7 @@ def main():
             run_id=run_id
         )
 
+        # Execute the lifecycle
         orchestrator.run()
 
     except PipelineError as e:
