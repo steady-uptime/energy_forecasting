@@ -1,9 +1,9 @@
-# src/cli/train.py
+# src/cli/run_train.py
 
 # --- Entry Point ---
 from pathlib import Path
 from loguru import logger  
-from src.core.config_loader import config  # This triggers ConfigLoader()
+from core.config import config  # This triggers ConfigLoader()
 from src.infra.logger import setup_logger
 
 

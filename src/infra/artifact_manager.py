@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 from dataclasses import is_dataclass, asdict
 from datetime import datetime
 from loguru import logger
-from src.core.config_loader import ArtifactConfig
+from src.core.config.schemas import ArtifactsConfig
 from src.core.exceptions import ArtifactError
 
 class ArtifactManager:
@@ -14,7 +14,7 @@ class ArtifactManager:
     Infrastructure Layer: Handles the 'How' and 'Where' of storage.
     Decoupled from the ML Model logic and the Registry.
     """
-    def __init__(self, artifact_cfg: ArtifactConfig, project_root: Path, run_id: str):
+    def __init__(self, artifact_cfg: ArtifactsConfig, project_root: Path, run_id: str):
         self.artifact_cfg = artifact_cfg
         self.project_root = project_root
         self.run_id = run_id

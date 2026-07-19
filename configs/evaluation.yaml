@@ -1,0 +1,9 @@
+# configs/evaluation.yaml
+evaluation:
+  metrics:
+    - rmse
+    - mse
+  thresholds:
+    rmse: 0.5
+    mse: 0.25
+  report_format: "json"

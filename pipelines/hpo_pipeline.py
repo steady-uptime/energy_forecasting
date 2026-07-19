@@ -8,7 +8,7 @@ from src.core.hpo_orchestrator import HyperparameterOrchestrator
 from src.core.comparison_orchestrator import ComparisonOrchestrator
 
 # Services (Dependency Injection)
-from src.core.config_loader import AppConfig
+from core.config import AppConfig
 from src.core.comparison_service import CandidateResult 
 from src.infra.data_repository import DataRepository
 from src.core.ingestion_service import IngestionService

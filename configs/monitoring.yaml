@@ -1,14 +1,16 @@
 # configs/monitoring.yaml
 monitoring:
-  live_data_path: "data/raw/live_data.csv"
+  # Keep the operational logic here
   primary_metric: "rmse"
   drift_threshold: 0.10     # 10% relative increase allowed
-  report_path: "artifacts/monitoring"
 
+  # Thresholds for live production drift
+  # (Distinct from EvaluationConfig which handles training validation)
   thresholds:
     rmse_ratio: 1.10
     mse_ratio: 1.10
 
   reporting:
-    drift_report_dir: "artifacts/reports/drift"
-
+    # Remove hardcoded paths; these should be derived from ArtifactConfig
+    # or injected via the orchestrator.
+    drift_report_format: "json"

@@ -7,7 +7,7 @@ from src.core.model_registry import ModelRegistry
 from src.infra.artifact_manager import ArtifactManager
 from src.core.preprocessing_service import DataPreprocessor
 from src.core.feature_engineering import FeatureEngineer
-from src.core.config_loader import config
+from core.config import config
 from tests.helpers.payloads import sample_payload
 
 def test_inference_service_predict():

@@ -1,37 +1,41 @@
 # src/core/train_orchestrator.py
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Callable
 from pathlib import Path
 from loguru import logger
 from datetime import datetime, UTC
 import json
 from dataclasses import asdict
+
 import yaml
 
 from src.core.exceptions import PipelineError
 from src.infra.data_repository import DataRepository
-from src.infra.artifact_manager import ArtifactManager  # Restored Import
+from src.infra.artifact_manager import ArtifactManager
 from src.core.modeling import ModelWorkerFactory
 from src.core.evaluator import ModelEvaluator
 from src.core.model_registry import ModelRegistry
 from src.core.data_orchestrator import DataOrchestrator
 from src.core.splitter_service import TimeSeriesSplitter
 from src.core.run_metadata import PipelineRunMetadata, PhaseMetadata
+from src.core.config.schemas import AppConfig
+from src.core.hpo_orchestrator import HPOOrchestrator
+
 
 class TrainingOrchestrator:
     """
     Production-grade training orchestrator.
 
-    Responsibilities:
-    - Manage high-level training phases (Data Prep -> Split -> Model -> Eval -> Registry).
-    - Coordinate the DataOrchestrator for all data engineering.
-    - Track state (artifacts) across the pipeline.
-    - Enforce Portability and Config-Driven Architecture.
-    - Emit structured metadata and configuration snapshots for reproducibility.
+    Phases:
+    - Data Orchestration (DataOrchestrator)
+    - Splitting (TimeSeriesSplitter)
+    - HPO / Modeling (HPOOrchestrator + ModelWorkerFactory)
+    - Evaluation (ModelEvaluator)
+    - Registry (ModelRegistry)
     """
 
     def __init__(
         self,
-        config,
+        config: AppConfig,
         repo: DataRepository,
         data_orchestrator: DataOrchestrator,
         splitter: TimeSeriesSplitter,
@@ -41,13 +45,13 @@ class TrainingOrchestrator:
         registry: ModelRegistry,
         run_id: str,
     ):
-        # Core config slices
         self.config = config
         self.data_cfg = config.data
         self.artifacts_cfg = config.artifacts
         self.model_cfg = config.model
+        self.hpo_cfg = config.model.hpo
+        self.eval_cfg = config.evaluation
 
-        # Services (Dependency Injection)
         self.repo = repo
         self.data_orchestrator = data_orchestrator
         self.splitter = splitter
@@ -56,11 +60,9 @@ class TrainingOrchestrator:
         self.evaluator = evaluator
         self.registry = registry
 
-        # Context
         self.run_id = run_id
         self.project_root = Path(config.project_root)
 
-        # State registry
         self.artifacts: Dict[str, Any] = {}
 
     def _log(self):
@@ -69,38 +71,41 @@ class TrainingOrchestrator:
     # -------------------------
     # Phase-Specific Logic
     # -------------------------
-    def _phase_modeling(self, X_train: Any, y_train: Any) -> Tuple[Any, Path]:
+    def _phase_modeling_hpo(self, engineered_data: Any) -> Tuple[Any, Path, Dict[str, Any]]:
+        """
+        Run HPO over the engineered data, return best model, path, and metrics.
+        """
         log = self._log()
-        log.info("--- Starting Model Engineering Phase ---")
+        log.info("--- Starting HPO / Model Engineering Phase ---")
 
-        worker = self.model_factory.get_worker(self.model_cfg, run_id=self.run_id)
-        trained_model = worker.train(X_train, y_train)
+        hpo = HPOOrchestrator(
+            model_factory=self.model_factory,
+            evaluator=self.evaluator,
+            splitter=self.splitter,
+            model_cfg=self.model_cfg,
+            hpo_cfg=self.hpo_cfg,
+            eval_cfg=self.eval_cfg,
+            run_id=self.run_id,
+        )
 
-        log.info("Saving Model")
-        model_path = self.artifact_manager.save_model(trained_model, self.model_cfg.name)
+        hpo_result = hpo.run(engineered_data)
+        best_trial = hpo_result.best_trial(metric_name=self.eval_cfg.primary_metric)
 
-        self.artifacts["model"] = trained_model
-        self.artifacts["model_path"] = model_path
-
-        return trained_model, model_path
-
-    def _phase_evaluation(self, trained_model: Any, X_test: Any, y_test: Any, model_path: Path) -> Any:
-        log = self._log()
-        log.info("--- Starting Evaluation Phase ---")
-
-        metrics = self.evaluator.evaluate(trained_model, X_test, y_test, run_id=self.run_id)
-
-        log.info("Saving Model Metrics")
+        # Persist best model metrics via artifact manager
         self.artifact_manager.save_metrics(
-            metrics=metrics,
+            metrics=best_trial.metrics,
             model_name=self.model_cfg.name,
-            model_uri=str(model_path),
-            hyperparameters=self.model_cfg.params,
+            model_uri=str(best_trial.model_path),
+            hyperparameters=best_trial.params,
             training_params=self.config.training,
         )
 
-        self.artifacts["metrics"] = metrics
-        return metrics
+        self.artifacts["model_path"] = best_trial.model_path
+        self.artifacts["metrics"] = best_trial.metrics
+        self.artifacts["best_trial_id"] = best_trial.trial_id
+
+        log.info(f"Best trial: {best_trial.trial_id} | Metrics={best_trial.metrics}")
+        return best_trial, best_trial.model_path, best_trial.metrics
 
     def _phase_registry(self, model_path: Path, metrics: Any) -> Dict[str, Any]:
         log = self._log()
@@ -109,7 +114,7 @@ class TrainingOrchestrator:
         record = self.registry.register(
             model_name=self.model_cfg.name,
             model_path=str(model_path),
-            metrics=metrics
+            metrics=metrics,
         )
 
         self.artifacts["registry_record"] = record
@@ -128,55 +133,39 @@ class TrainingOrchestrator:
             pipeline_name="train_pipeline",
             status="RUNNING",
             started_at=datetime.now(UTC),
-            tags={"env": "dev"}
+            tags={"env": "dev"},
         )
 
         try:
-            # Phase 1: Data Orchestration (Consolidated Ingestion + Preprocessing + Engineering)
+            # Phase 1: Data Orchestration
             raw_file = Path(self.config.paths.raw_data) / self.artifacts_cfg.input_file
-            
+
             log.info(f"Initiating Data Orchestration for {raw_file}")
             engineered_data = self._run_phase(
-                "data_orchestration", 
-                metadata, 
-                self.data_orchestrator.run_pipeline, 
-                str(raw_file)
+                "data_orchestration",
+                metadata,
+                self.data_orchestrator.run,
+                raw_file,
             )
 
-            # Phase 2: Splitting
-            X_train, y_train, X_test, y_test, _ = self._run_phase(
-                "splitting", 
-                metadata, 
-                self.splitter.split, 
-                engineered_data
+            # Phase 2: HPO / Modeling (includes splitting internally)
+            best_trial, model_path, metrics = self._run_phase(
+                "modeling_hpo",
+                metadata,
+                self._phase_modeling_hpo,
+                engineered_data,
             )
 
-            # Phase 3: Modeling
-            trained_model, model_path = self._run_phase(
-                "modeling", 
-                metadata, 
-                self._phase_modeling, 
-                X_train, y_train
-            )
-
-            # Phase 4: Evaluation
-            metrics = self._run_phase(
-                "evaluation", 
-                metadata, 
-                self._phase_evaluation, 
-                trained_model, X_test, y_test, model_path
-            )
-
-            # Phase 5: Model Registry
+            # Phase 3: Model Registry
             record = self._run_phase(
-                "registry", 
-                metadata, 
-                self._phase_registry, 
-                model_path, metrics
+                "registry",
+                metadata,
+                self._phase_registry,
+                model_path,
+                metrics,
             )
-            
-            metadata.registry_version = record.get("version")
 
+            metadata.registry_version = record.get("version")
             metadata.status = "SUCCESS"
             log.info("Pipeline executed successfully.")
 
@@ -199,18 +188,23 @@ class TrainingOrchestrator:
     # -------------------------
     # Utility & Observability Methods
     # -------------------------
-    def _run_phase(self, name: str, metadata: PipelineRunMetadata, fn, *args) -> Any:
-        phase_meta = PhaseMetadata(name=name, status="RUNNING", started_at=datetime.now(UTC))
+    def _run_phase(
+        self,
+        name: str,
+        metadata: PipelineRunMetadata,
+        fn: Callable[..., Any],
+        *args: Any,
+    ) -> Any:
+        phase_meta = PhaseMetadata(
+            name=name,
+            status="RUNNING",
+            started_at=datetime.now(UTC),
+        )
         metadata.phases[name] = phase_meta
 
         try:
             result = fn(*args)
             phase_meta.status = "SUCCESS"
-
-            # If the phase returns artifacts (dict), attach them to metadata
-            if isinstance(result, dict):
-                phase_meta.artifact_paths.update(result)
-
             return result
 
         except Exception as exc:
@@ -230,7 +224,7 @@ class TrainingOrchestrator:
 
         path = metadata_dir / f"run_{metadata.run_id}.json"
 
-        def _serialize(obj):
+        def _serialize(obj: Any) -> Any:
             if isinstance(obj, datetime):
                 return obj.isoformat()
             if hasattr(obj, "__dict__"):
@@ -241,19 +235,14 @@ class TrainingOrchestrator:
             json.dump(metadata, f, default=_serialize, indent=2)
 
     def _snapshot_config(self, metadata: PipelineRunMetadata) -> None:
-        """
-        Persist a frozen copy of the merged configuration used for this run.
-        Ensures full reproducibility.
-        """
         snapshot_dir = self.project_root / self.artifacts_cfg.metadata_path
         snapshot_dir.mkdir(parents=True, exist_ok=True)
 
         snapshot_path = snapshot_dir / f"config_{metadata.run_id}.yaml"
 
-        # Convert dataclass config → dict
         config_dict = asdict(self.config)
 
-        def convert_paths(obj):
+        def convert_paths(obj: Any) -> Any:
             if isinstance(obj, Path):
                 return str(obj)
             elif isinstance(obj, dict):

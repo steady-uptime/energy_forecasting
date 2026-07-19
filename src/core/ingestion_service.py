@@ -1,12 +1,14 @@
 # src/core/ingestion_service.py
 import pandas as pd
-from src.core.config_loader import DataConfig
+from src.core.config.schemas import DataConfig
 from src.infra.data_repository import DataRepository
 from src.core.exceptions import IngestionError, DataValidationError
 from loguru import logger
 
+
 class IngestionService:
     def __init__(self, repo: DataRepository, data_cfg: DataConfig, run_id: str):
+        # Invariant: Explicitly typed DataConfig injection
         self.repo = repo
         self.data_cfg = data_cfg
         self.run_id = run_id
@@ -20,6 +22,7 @@ class IngestionService:
     
         try:
             # 1. Fetch data via Infrastructure
+            # Invariant: Using typed config for separator
             df = self.repo.read_csv(filename, sep=self.data_cfg.csv_separator)
     
             # 2. Immutability: Work on a copy
@@ -41,6 +44,7 @@ class IngestionService:
             # 4. Domain Logic: Type Casting
             df[target_col] = pd.to_datetime(df[target_col], errors="raise")
     
+            # Invariant: Using typed config for precision
             precision = self.data_cfg.timestamp_precision
             df[target_col] = df[target_col].astype(f"datetime64[{precision}]")
     

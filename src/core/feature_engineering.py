@@ -1,6 +1,6 @@
 # src/core/feature_engineering.py
 import pandas as pd
-from src.core.config_loader import FeaturesConfig
+from src.core.config.schemas import FeaturesConfig
 from src.core.exceptions import FeatureEngineeringError
 from loguru import logger
 

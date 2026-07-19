@@ -7,7 +7,7 @@ and schema alignment behave correctly before feature engineering is applied.
 
 from loguru import logger
 from pathlib import Path
-from src.core.config_loader import ConfigLoader
+from core.config import ConfigLoader
 from src.infra.data_repository import DataRepository
 from src.core.preprocessing_service import DataPreprocessor
 

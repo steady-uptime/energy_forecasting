@@ -9,7 +9,7 @@ from loguru import logger
 from pathlib import Path
 import pandas as pd
 
-from src.core.config_loader import ConfigLoader
+from core.config import ConfigLoader
 from src.core.feature_engineering import FeatureEngineer
 from src.infra.data_repository import DataRepository
 from src.core.validator import DataValidator

@@ -18,17 +18,17 @@ env:
     memory_limit_gb: 16
 
 
-# ENVIRONMENT VARIABLE MAPPING
-# ---------------------------------------------------------
-# This maps OS Environment Variables to the internal configuration keys.
-# This follows the "Single Source of Truth" principle.
-env_mapping:
-  DATA_PATH: ["paths", "raw_data"]
-  ARTIFACT_PATH: ["paths", "artifacts"] # Updated to align with Artifact Root
-  LOG_LEVEL: ["logging", "level"]
-  BATCH_SIZE: ["training", "batch_size"]
-  LEARNING_RATE: ["training", "learning_rate"]
-  ENV_MODE: ["env", "mode"]
+  # ENVIRONMENT VARIABLE MAPPING
+  # ---------------------------------------------------------
+  # This maps OS Environment Variables to the internal configuration keys.
+  # This follows the "Single Source of Truth" principle.
+  env_mapping:
+    DATA_PATH: ["paths", "raw_data"]
+    ARTIFACT_PATH: ["paths", "artifacts"] # Updated to align with Artifact Root
+    LOG_LEVEL: ["logging", "level"]
+    BATCH_SIZE: ["training", "batch_size"]
+    LEARNING_RATE: ["training", "learning_rate"]
+    ENV_MODE: ["env", "mode"]
 
 
 # INFRASTRUCTURE LAYER (Pathing Contract)

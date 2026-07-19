@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from loguru import logger
-from src.core.config_loader import config
+from core.config import config
 from src.infra.logger import setup_logger
 
 

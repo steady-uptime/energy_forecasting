@@ -3,7 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 from loguru import logger
-from src.core.config_loader import ConfigLoader # Your existing Singleton
+from core.config import ConfigLoader # Your existing Singleton
 from pipelines.hpo_pipeline import HPOTrainingPipeline
 
 def main():

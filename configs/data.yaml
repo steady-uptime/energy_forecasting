@@ -1,14 +1,6 @@
 # configs/data.yaml
 # DATA ENGINEERING LAYER (Logic & Schema)
 # ---------------------------------------------------------
-
-# This section defines the contract between the Data Loader and the Preprocessor.
-# Target columns
-# Feature column patterns
-# Split configs
-# Preprocessing rules (Imputation, Encoding)
-# Schema Validation (The gatekeeper contract)
-
 data:
   # -----------------------------
   # INGESTION CONFIG
@@ -90,3 +82,13 @@ data:
       type: "int64"
     - column: "total_load"
       type: "float64"
+
+features:
+  total_load:
+    method: "sum"
+    pattern: "^MT_\\d{3}$"
+
+  time_features:
+    hour_of_day: true
+    day_of_week: true
+    is_weekend: true

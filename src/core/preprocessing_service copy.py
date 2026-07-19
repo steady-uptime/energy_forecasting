@@ -5,7 +5,6 @@ from src.core.exceptions import PreprocessingError
 from src.core.config.schemas import PreprocessingConfig
 from loguru import logger
 
-
 class DataPreprocessor:
     """
     Worker: Handles Data Sanitization.
@@ -17,9 +16,9 @@ class DataPreprocessor:
     - Single responsibility: Data cleaning and transformation.
     """
 
-    def __init__(self, rules: PreprocessingConfig, processed_path: Path, run_id: str):
-        # Dependency Injection: typed PreprocessingConfig
-        self.rules = rules
+    def __init__(self, config: PreprocessingConfig, processed_path: Path, run_id: str):
+        # Dependency Injection: The config object is passed from the Orchestrator
+        self.config = config
         self.processed_path = processed_path
         self.run_id = run_id
 
@@ -43,7 +42,7 @@ class DataPreprocessor:
             # -----------------------------
             # Drop Columns
             # -----------------------------
-            actual_drops = [col for col in self.rules.drop_columns if col in df.columns]
+            actual_drops = [col for col in self.config.drop_columns if col in df.columns]
             df = df.drop(columns=actual_drops)
 
             logger.bind(
@@ -55,11 +54,14 @@ class DataPreprocessor:
             # -----------------------------
             # Timestamp normalization
             # -----------------------------
+            # Assume first column is the timestamp, as in ingestion
             ts_col = df.columns[0]
 
+            # Rename to canonical name expected by FeatureEngineer
             if ts_col != "timestamp":
                 df = df.rename(columns={ts_col: "timestamp"})
 
+            # Parse to datetime
             df["timestamp"] = pd.to_datetime(df["timestamp"], errors="raise")
 
             logger.bind(
@@ -72,19 +74,22 @@ class DataPreprocessor:
             # -----------------------------
             # Convert MT_* columns to numeric
             # -----------------------------
-            if self.rules.convert_to_numeric:
+            # New Access: config.convert_to_numeric
+            if self.config.convert_to_numeric:
                 mt_cols = df.filter(regex=r"^MT_\d{3}$").columns
-
+            
+                # Normalize decimal commas
                 df[mt_cols] = df[mt_cols].replace({",": "."}, regex=True)
-
+            
                 logger.bind(
                     module="DataPreprocessor",
                     run_id=self.run_id,
                     columns=list(mt_cols)
                 ).debug("Normalized decimal commas in MT_* columns")
-
+            
+                # Convert to numeric
                 df[mt_cols] = df[mt_cols].apply(pd.to_numeric, errors="coerce")
-
+            
                 logger.bind(
                     module="DataPreprocessor",
                     run_id=self.run_id,
@@ -94,11 +99,12 @@ class DataPreprocessor:
             # -----------------------------
             # Frequency Conversion (kW → kWh)
             # -----------------------------
-            freq_cfg = self.rules.frequency_conversion
+            # New Access: config.frequency_conversion (Nested Dataclass)
+            freq_cfg = self.config.frequency_conversion
             if freq_cfg.enabled:
                 factor = freq_cfg.factor
                 mt_cols = df.filter(regex=r"^MT_\d{3}$").columns
-                df[mt_cols] = df[mt_cols] * factor
+                df[mt_cols] = df[mt_cols] * factor 
 
                 logger.bind(
                     module="DataPreprocessor",
@@ -110,7 +116,7 @@ class DataPreprocessor:
             # -----------------------------
             # Encoding
             # -----------------------------
-            for col, mapping in self.rules.encoding.mappings.items():
+            for col, mapping in self.config.encoding.mappings.items():
                 if col in df.columns:
                     df[col] = df[col].map(mapping)
                     logger.bind(
@@ -122,7 +128,8 @@ class DataPreprocessor:
             # -----------------------------
             # Imputation
             # -----------------------------
-            strategy = self.rules.imputation.strategy
+            # New Access: config.imputation (Nested Dataclass)
+            strategy = self.config.imputation.strategy
 
             if strategy == "forward_fill":
                 df = df.ffill()
@@ -156,7 +163,7 @@ class DataPreprocessor:
             raise PreprocessingError(
                 "Failed during preprocessing",
                 context={
-                    "rules": self.rules,
+                    "config": self.config,
                     "processed_path": str(self.processed_path)
                 }
             ) from e

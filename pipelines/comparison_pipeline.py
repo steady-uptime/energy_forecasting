@@ -1,7 +1,7 @@
 # pipelines/comparison_pipeline.py
 import sys
 from pathlib import Path
-from src.core.config_loader import ConfigLoader
+from core.config import ConfigLoader
 from src.core.validator import DataValidator
 from src.core.model_validator import ModelMetricValidator
 from src.core.evaluator import ModelEvaluator

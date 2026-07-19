@@ -1,7 +1,8 @@
+# src/infra/logger.py
 import sys
 from pathlib import Path
 from loguru import logger
-from src.core.config_loader import LoggingConfig
+from src.core.config.schemas import LoggingConfig
 
 def setup_logger(config: LoggingConfig, project_root: Path) -> None:
     """

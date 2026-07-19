@@ -1,12 +1,10 @@
 # pipelines/monitor_pipeline.py
-
 import sys
 import uuid
 from pathlib import Path
-
 from loguru import logger
 
-from src.core.config_loader import config
+from core.config import config
 from src.infra.logger import setup_logger
 from src.infra.data_repository import DataRepository
 from src.infra.artifact_manager import ArtifactManager
@@ -52,8 +50,9 @@ def main():
         )
 
         # -----------------------------------------------------
-        # Service Layer (same DI pattern as training)
+        # Service Layer (Dependency Injection)
         # -----------------------------------------------------
+        # We inject only the specific config objects required by each service
         ingestion_service = IngestionService(
             repo=repo,
             data_cfg=config.data,
@@ -78,24 +77,21 @@ def main():
             run_id=run_id
         )
 
-        evaluator = ModelEvaluator
-
-        monitoring_cfg = config.monitoring
-
         # -----------------------------------------------------
-        # Monitoring Service (DI)
+        # Monitoring Service (Refactored Injection)
         # -----------------------------------------------------
+        # FIX 1: Removed redundant 'config' (AppConfig) 
+        # FIX 2: Ensured 'evaluator' is handled correctly (passed as class or instance)
         monitoring_service = MonitoringService(
-            config=config,
+            config=config.monitoring,              # Only inject the domain-specific config
             repo=repo,
             ingestion=ingestion_service,
             preprocessor=preprocessor,
             engineer=engineer,
             splitter=splitter,
             artifact_manager=artifact_manager,
-            evaluator=evaluator,
+            evaluator=ModelEvaluator,             # Keep as class if using @staticmethod
             registry=registry,
-            monitoring_cfg=monitoring_cfg,
             run_id=run_id
         )
 

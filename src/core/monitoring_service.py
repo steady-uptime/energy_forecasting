@@ -1,18 +1,7 @@
 # src/core/monitoring_service.py
-# Compared to TrainingOrchestrator.run():
-# No modeling phase (no training)
-# No registry phase (no new champion registration)
-# No model saving
-# No metrics saving for training
-# No train/test split for training (only live slice)
-# No hyperparameters / training config handling
-# Monitoring is:
-# same data path (ingestion → preprocessing → features → split)
-# different end (evaluate → drift → report)
-
 from pathlib import Path
 from datetime import datetime, UTC
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 from loguru import logger
 
@@ -26,7 +15,7 @@ from src.core.splitter_service import TimeSeriesSplitter
 from src.infra.artifact_manager import ArtifactManager
 from src.core.evaluator import ModelEvaluator
 from src.core.model_registry import ModelRegistry
-
+from core.config import MonitoringConfig, DataConfig
 
 class MonitoringService:
     """
@@ -44,7 +33,8 @@ class MonitoringService:
 
     def __init__(
         self,
-        config,
+        monitoring_cfg: MonitoringConfig,
+        data_cfg: DataConfig,
         repo: DataRepository,
         ingestion: IngestionService,
         preprocessor: DataPreprocessor,
@@ -53,15 +43,13 @@ class MonitoringService:
         artifact_manager: ArtifactManager,
         evaluator: ModelEvaluator,
         registry: ModelRegistry,
-        monitoring_cfg,
         run_id: str,
     ):
-        # Core config slices
-        self.config = config
-        self.data_cfg = config.data
+        # Domain-Specific Configs (Injected)
         self.monitoring_cfg = monitoring_cfg
+        self.data_cfg = data_cfg
 
-        # Services (DI)
+        # Services (Dependency Injection)
         self.repo = repo
         self.ingestion = ingestion
         self.preprocessor = preprocessor
@@ -73,9 +61,8 @@ class MonitoringService:
 
         # Context
         self.run_id = run_id
-        self.project_root = Path(config.project_root)
 
-        # State (optional, for debugging/inspection)
+        # State (for debugging/inspection)
         self.artifacts: Dict[str, Any] = {}
 
     def _log(self):
@@ -84,7 +71,7 @@ class MonitoringService:
     # -------------------------
     # Phase 0: Champion Load
     # -------------------------
-    def _load_champion(self):
+    def _load_champion(self) -> Tuple[Any, Dict[str, float], str]:
         log = self._log()
         log.info("Loading champion model from registry")
 
@@ -92,7 +79,7 @@ class MonitoringService:
             record = self.registry.load_champion()
             model_path = record["model_path"]
             baseline_metrics = record["metrics"]
-            version = record.get("version")
+            version = record.get("version", "unknown")
 
             model = self.artifact_manager.load_model(model_path)
 
@@ -109,22 +96,23 @@ class MonitoringService:
     # -------------------------
     # Phase 1: Live Data Ingestion + Preprocessing
     # -------------------------
-    def _load_live_data(self):
+    def _load_live_data(self) -> Any:
         log = self._log()
         log.info("Loading live data for monitoring")
 
         try:
+            # Use the path defined in the MonitoringConfig
             live_file = Path(self.monitoring_cfg.live_data_path)
             log.info(f"Resolved live data file: {live_file}")
 
-            # Ingestion (same as training orchestrator)
+            # Ingestion
             raw_live = self.ingestion.load_raw_energy_data(str(live_file))
             self.artifacts["raw_live"] = raw_live
 
             log.info("Validating Raw Live Data Contract...")
             DataValidator(self.data_cfg.raw_schema).validate(raw_live)
 
-            # Preprocessing (same as training orchestrator)
+            # Preprocessing
             preprocessed_live = self.preprocessor.clean_data(raw_live)
             self.artifacts["preprocessed_live"] = preprocessed_live
 
@@ -142,7 +130,7 @@ class MonitoringService:
     # -------------------------
     # Phase 2: Feature Engineering
     # -------------------------
-    def _apply_feature_engineering(self, preprocessed_live):
+    def _apply_feature_engineering(self, preprocessed_live: Any) -> Any:
         log = self._log()
         log.info("Applying feature engineering to live data")
 
@@ -162,14 +150,13 @@ class MonitoringService:
     # -------------------------
     # Phase 3: Time-Series Split (Live Slice)
     # -------------------------
-    def _apply_split(self, engineered_live):
+    def _apply_split(self, engineered_live: Any) -> Tuple[Any, Any, Any]:
         log = self._log()
         log.info("Applying time-series split for monitoring")
 
         try:
             # Reuse the same splitter as training.
             # Convention: splitter returns (X_train, y_train, X_test, y_test, meta)
-            # For monitoring, we treat X_test/y_test as the "live" slice.
             X_train, y_train, X_test, y_test, meta = self.splitter.split(engineered_live)
 
             self.artifacts["split_live"] = {
@@ -190,11 +177,12 @@ class MonitoringService:
     # -------------------------
     # Phase 4: Evaluation
     # -------------------------
-    def _evaluate_live(self, model, X_live, y_live):
+    def _evaluate_live(self, model: Any, X_live: Any, y_live: Any) -> Dict[str, float]:
         log = self._log()
         log.info("Starting live data evaluation")
 
         try:
+            # Use the injected evaluator
             metrics = self.evaluator.evaluate(model, X_live, y_live, run_id=self.run_id)
             self.artifacts["live_metrics"] = metrics
 
@@ -213,10 +201,8 @@ class MonitoringService:
         log.info("Starting drift detection")
 
         try:
-            # Simple example: compare RMSE or MAE thresholds.
-            # You can replace this with a more sophisticated drift logic.
             metric_name = self.monitoring_cfg.primary_metric  # e.g., "rmse"
-            threshold = self.monitoring_cfg.drift_threshold   # e.g., 0.10 (10%)
+            threshold = self.monitoring_cfg.drift_threshold      # e.g., 0.10 (10%)
 
             baseline = baseline_metrics[metric_name]
             current = live_metrics[metric_name]
@@ -244,12 +230,15 @@ class MonitoringService:
     # -------------------------
     # Phase 6: Reporting
     # -------------------------
-    def _emit_report(self, drift_detected: bool, baseline_metrics, live_metrics, model_version: str | None):
+    def _emit_report(self, drift_detected: bool, baseline_metrics: Dict[str, float], 
+                      live_metrics: Dict[str, float], model_version: str | None):
         log = self._log()
         log.info("Emitting monitoring report")
 
         try:
-            report_dir = self.project_root / self.monitoring_cfg.report_path
+            # Note: Path logic is handled by ArtifactManager or calculated via config
+            # We use the monitoring_cfg.report_path as the target directory
+            report_dir = Path(self.monitoring_cfg.report_path)
             report_dir.mkdir(parents=True, exist_ok=True)
 
             timestamp = datetime.now(UTC).isoformat()
@@ -279,50 +268,23 @@ class MonitoringService:
     # Orchestrator Entry Point
     # -------------------------
     def run(self) -> bool:
-        """
-        Execute the monitoring pipeline:
-
-        - Load champion model and baseline metrics.
-        - Ingest, preprocess, and engineer live data.
-        - Apply time-series split to obtain live evaluation slice.
-        - Evaluate champion on live data.
-        - Detect drift.
-        - Emit monitoring report.
-
-        Returns:
-            bool: True if drift detected, False otherwise.
-        """
         log = self._log()
         log.info("Monitoring pipeline started")
 
         try:
-            # Phase 0: Champion
             model, baseline_metrics, model_version = self._load_champion()
-
-            # Phase 1: Live Data (ingestion + preprocessing)
             preprocessed_live = self._load_live_data()
-
-            # Phase 2: Feature Engineering
             engineered_live = self._apply_feature_engineering(preprocessed_live)
-
-            # Phase 3: Split (live slice)
             X_live, y_live, meta = self._apply_split(engineered_live)
             self.artifacts["split_meta"] = meta
-
-            # Phase 4: Evaluation
             live_metrics = self._evaluate_live(model, X_live, y_live)
-
-            # Phase 5: Drift Detection
             drift_detected = self._detect_drift(baseline_metrics, live_metrics)
-
-            # Phase 6: Reporting
             self._emit_report(drift_detected, baseline_metrics, live_metrics, model_version)
 
             log.info(f"Monitoring complete. Drift detected: {drift_detected}")
             return drift_detected
 
         except MonitoringError:
-            # Already wrapped with context
             log.error("Monitoring pipeline failed with a monitored error")
             raise
         except Exception as e:

@@ -2,12 +2,15 @@
 import re
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Any
-from src.core.exceptions import IngestionError
+from typing import Dict, List
 from loguru import logger
 
+from src.core.exceptions import IngestionError
+from src.core.config.schemas import DataConfig   # FIXED: Typed Contract import
+
+
 class DataRepository:
-    def __init__(self, project_root: Path, data_config: Any, run_id: str):
+    def __init__(self, project_root: Path, data_config: DataConfig, run_id: str):
         self.project_root = project_root
         self.data_config = data_config
         self.run_id = run_id
@@ -25,26 +28,30 @@ class DataRepository:
         concrete dictionary for Pandas (Exact Matches).
         """
         dtype_map: Dict[str, str] = {}
+        # Invariant: Accessing SchemaField objects via dot-notation
         raw_schema = self.data_config.raw_schema
 
         for entry in raw_schema:
-            if "column" in entry:
+            # RECONCILED: entry is a SchemaField object, not a dict
+            if entry.column:
                 # Handle exact matches (e.g., "timestamp")
-                col_name = entry["column"]
+                col_name = entry.column
                 if col_name in columns:
-                    dtype_map[col_name] = entry["type"]
+                    dtype_map[col_name] = entry.type
             
-            elif "column_pattern" in entry:
+            elif entry.column_pattern:
                 # Handle regex matches (e.g., "^MT_\\d{3}$")
-                pattern = entry["column_pattern"]
-                target_type = entry["type"]
+                pattern = entry.column_pattern
+                target_type = entry.type
                 for col in columns:
                     if re.match(pattern, col):
                         dtype_map[col] = target_type
         
         return dtype_map
 
-    def read_csv(self, relative_path: str, sep: str = ",") -> pd.DataFrame:
+    def read_csv(self, relative_path: str, sep: str = None) -> pd.DataFrame:
+        # Invariant: Fallback to config if sep is not provided via orchestrator
+        separator = sep if sep is not None else self.data_config.csv_separator
         path = self.resolve_path(relative_path)
 
         logger.bind(
@@ -66,12 +73,10 @@ class DataRepository:
 
         try:
             # STEP 1: Metadata Probe (Header Peek)
-            # We read 0 rows to extract column names without loading the data.
-            header_df = pd.read_csv(path, sep=sep, header=0, nrows=0)
+            header_df = pd.read_csv(path, sep=separator, header=0, nrows=0)
             columns = header_df.columns.tolist()
             
             # STEP 2: Contract Translation
-            # Convert the YAML Regex patterns into a flat Dict for Pandas.
             dtype_map = self._resolve_dtypes_from_schema(columns)
 
             logger.bind(
@@ -82,11 +87,9 @@ class DataRepository:
             ).debug("Resolved dtypes from schema")
 
             # STEP 3: Data Ingestion with Type Enforcement
-            # We pass the dtypes to ensure the 'Execution' matches our 'Intent'.
-            # We also handle date parsing for the 'timestamp' column specifically.
             df = pd.read_csv(
                 path, 
-                sep=sep, 
+                sep=separator, 
                 dtype=dtype_map,
                 parse_dates=['timestamp'] if 'timestamp' in columns else None
             )
@@ -111,7 +114,7 @@ class DataRepository:
                 "Failed to ingest CSV",
                 context={
                     "path": str(path),
-                    "sep": sep,
+                    "sep": separator,
                     "dtype_map": dtype_map if 'dtype_map' in locals() else None
                 }
             ) from e

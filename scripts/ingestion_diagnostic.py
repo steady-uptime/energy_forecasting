@@ -8,7 +8,7 @@ before preprocessing or feature engineering are applied.
 
 from loguru import logger
 
-from src.core.config_loader import ConfigLoader
+from core.config import ConfigLoader
 from src.infra.data_repository import DataRepository
 
 def main():
