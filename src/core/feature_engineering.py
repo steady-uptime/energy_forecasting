@@ -30,9 +30,9 @@ class FeatureEngineer:
             # -------------------------------------------------
             # Total Load Feature
             # -------------------------------------------------
-            total_cfg = self.rules.total_load
-            pattern = total_cfg["pattern"]
-            method = total_cfg["method"]
+            total_cfg = self.rules.aggregate
+            pattern = total_cfg.pattern
+            method = total_cfg.method
 
             mt_cols = df.filter(regex=pattern).columns
             df["total_load"] = df[mt_cols].sum(axis=1).astype("float64")
@@ -46,15 +46,15 @@ class FeatureEngineer:
             # -------------------------------------------------
             # Time-Based Features
             # -------------------------------------------------
-            time_cfg = self.rules.time_features
+            time_cfg = self.rules.time
 
-            if time_cfg.get("hour_of_day", False):
+            if time_cfg.hour_of_day:
                 df["hour_of_day"] = df["timestamp"].dt.hour.astype("int64")
 
-            if time_cfg.get("day_of_week", False):
+            if time_cfg.day_of_week:
                 df["day_of_week"] = df["timestamp"].dt.dayofweek.astype("int64")
 
-            if time_cfg.get("is_weekend", False):
+            if time_cfg.is_weekend:
                 df["is_weekend"] = (df["timestamp"].dt.dayofweek >= 5).astype("int64")
 
             logger.bind(

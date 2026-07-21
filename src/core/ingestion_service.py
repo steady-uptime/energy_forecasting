@@ -21,33 +21,22 @@ class IngestionService:
         ).info("Starting raw energy data ingestion")
     
         try:
-            # 1. Fetch data via Infrastructure
-            # Invariant: Using typed config for separator
-            df = self.repo.read_csv(filename, sep=self.data_cfg.csv_separator)
-    
-            # 2. Immutability: Work on a copy
-            df = df.copy()
-    
-            # 3. Dynamic Timestamp Detection
-            # The real LD2011_2014.txt always has the timestamp in the first column ("Unnamed: 0")
-            timestamp_col = df.columns[0]
-            target_col = "timestamp"
-    
-            logger.bind(
-                module="IngestionService",
-                run_id=self.run_id,
-                detected_timestamp_col=timestamp_col
-            ).info("Detected timestamp column")
-    
-            df = df.rename(columns={timestamp_col: target_col})
-    
-            # 4. Domain Logic: Type Casting
-            df[target_col] = pd.to_datetime(df[target_col], errors="raise")
-    
-            # Invariant: Using typed config for precision
+            # 1. Fetch raw data
+            df = self.repo.read_csv(filename, sep=self.data_cfg.csv_separator).copy()
+            
+            # 2. Identify the first column (timestamp column)
+            first_col = df.columns[0]
+            
+            # 3. Validate that the first column can be parsed as a timestamp
+            df[first_col] = pd.to_datetime(df[first_col], errors="raise")
+            
+            # 4. Apply precision contract
             precision = self.data_cfg.timestamp_precision
-            df[target_col] = df[target_col].astype(f"datetime64[{precision}]")
-    
+            df[first_col] = df[first_col].astype(f"datetime64[{precision}]")
+            
+            # 5. Rename it to 'timestamp' only after successful casting
+            df = df.rename(columns={first_col: "timestamp"})
+            
             logger.bind(
                 module="IngestionService",
                 run_id=self.run_id,

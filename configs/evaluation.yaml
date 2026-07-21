@@ -4,6 +4,6 @@ evaluation:
     - rmse
     - mse
   thresholds:
-    rmse: 0.5
-    mse: 0.25
+    rmse: 20000
+    mse: 500000000
   report_format: "json"

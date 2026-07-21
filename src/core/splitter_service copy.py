@@ -3,8 +3,6 @@ import pandas as pd
 from src.core.exceptions import SplitError, DataValidationError
 from loguru import logger
 from src.core.config.schemas import SplitConfig
-import pandas as pd
-from typing import Tuple
 
 class TimeSeriesSplitter:
     def __init__(self, split_cfg: SplitConfig, target_column: str, run_id: str):
@@ -18,7 +16,7 @@ class TimeSeriesSplitter:
             target_column=self.target_column
         ).info("TimeSeriesSplitter initialized")
 
-    def split(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+    def split(self, df: pd.DataFrame):
         logger.bind(
             module="TimeSeriesSplitter",
             run_id=self.run_id,
@@ -42,7 +40,7 @@ class TimeSeriesSplitter:
             train_end = pd.to_datetime(self.split_cfg.train_end)
             val_end = pd.to_datetime(self.split_cfg.val_end)
             test_end = pd.to_datetime(self.split_cfg.test_end)
-
+            
             logger.bind(
                 module="TimeSeriesSplitter",
                 run_id=self.run_id,
@@ -51,19 +49,22 @@ class TimeSeriesSplitter:
                 test_end=str(test_end)
             ).debug("Split boundaries resolved")
 
+            # 1. Perform the Temporal Split
             train = df[df["timestamp"] <= train_end]
             val = df[(df["timestamp"] > train_end) & (df["timestamp"] <= val_end)]
-            test = df[df["timestamp"] > val_end]  # kept for future use if needed
+            test = df[df["timestamp"] > val_end]
 
+            # 2. Define the Feature Set
             drop_cols = [self.target_column, "timestamp"]
             cols_to_drop = [c for c in drop_cols if c in train.columns]
 
             X_train = train.drop(columns=cols_to_drop)
             y_train = train[self.target_column]
 
-            X_val = val.drop(columns=cols_to_drop)
-            y_val = val[self.target_column]
+            X_test = test.drop(columns=cols_to_drop)
+            y_test = test[self.target_column]
 
+            # 3. Dynamic Schema Generation
             dynamic_schema = {
                 col: str(dtype)
                 for col, dtype in X_train.dtypes.items()
@@ -73,13 +74,11 @@ class TimeSeriesSplitter:
                 module="TimeSeriesSplitter",
                 run_id=self.run_id,
                 X_train_shape=X_train.shape,
-                X_val_shape=X_val.shape,
-                features=list(X_train.columns),
-                dynamic_schema=dynamic_schema,
+                X_test_shape=X_test.shape,
+                features=list(X_train.columns)
             ).info("Split complete")
 
-            # Contract now matches TrainingOrchestrator
-            return X_train, y_train, X_val, y_val
+            return X_train, y_train, X_test, y_test, dynamic_schema
 
         except Exception as e:
             logger.bind(

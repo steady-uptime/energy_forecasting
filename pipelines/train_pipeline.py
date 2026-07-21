@@ -17,6 +17,7 @@ from src.core.train_orchestrator import TrainingOrchestrator
 from src.core.model_registry import ModelRegistry
 from src.core.exceptions import PipelineError
 from src.core.data_orchestrator import DataOrchestrator
+from src.core.model_search_engine import ModelSearchEngine
 
 run_id = uuid.uuid4().hex
 from loguru import logger
@@ -74,6 +75,13 @@ def main():
         model_factory = ModelWorkerFactory(artifact_manager=artifact_manager)
         evaluator = ModelEvaluator(eval_cfg=config.evaluation)
 
+        model_search = ModelSearchEngine(
+            cfg=config.model_search,
+            model_factory=model_factory,
+            evaluator=evaluator,
+            artifact_manager=artifact_manager,
+        )
+
         orchestrator = TrainingOrchestrator(
             config=config,
             repo=repo,
@@ -81,6 +89,7 @@ def main():
             splitter=splitter,
             artifact_manager=artifact_manager,
             model_factory=model_factory,
+            model_search=model_search,
             evaluator=evaluator,
             registry=registry,
             run_id=run_id,

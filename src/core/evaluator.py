@@ -2,64 +2,66 @@
 from sklearn.metrics import mean_squared_error, root_mean_squared_error
 from typing import Any, Dict
 from loguru import logger
+
 from src.core.exceptions import ModelTrainingError
 from src.core.config.schemas import EvaluationConfig
+
 
 class ModelEvaluator:
     """
     Handles model performance evaluation using injected EvaluationConfig.
     """
-    @staticmethod
-    def evaluate(
-        model: Any, 
-        X_test, 
-        y_test, 
-        config: EvaluationConfig, 
-        run_id: str
-    ) -> Dict[str, float]:
+
+    def __init__(self, eval_cfg: EvaluationConfig):
+        self.eval_cfg = eval_cfg
+        self.metrics = eval_cfg.metrics
+        self.thresholds = eval_cfg.thresholds
+        self.report_format = eval_cfg.report_format
+
+    def evaluate(self, model: Any, X_val, y_val) -> Dict[str, float]:
         logger.bind(
             module="ModelEvaluator",
-            run_id=run_id,
-            X_shape=X_test.shape,
-            y_shape=y_test.shape
+            X_shape=X_val.shape,
+            y_shape=y_val.shape
         ).info("Starting model evaluation")
-        
-        try:
-            predictions = model.predict(X_test)
-            
-            # Use metrics defined in the injected config
-            metrics = {}
-            if "rmse" in config.metrics:
-                metrics["rmse"] = root_mean_squared_error(y_test, predictions)
-            if "mse" in config.metrics:
-                metrics["mse"] = mean_squared_error(y_test, predictions)
 
-            # Check thresholds from injected config
-            for metric_name, threshold in config.thresholds.items():
-                if metric_name in metrics and metrics[metric_name] > threshold:
+        try:
+            predictions = model.predict(X_val)
+
+            results = {}
+
+            # Compute metrics
+            if "rmse" in self.metrics:
+                results["rmse"] = root_mean_squared_error(y_val, predictions)
+
+            if "mse" in self.metrics:
+                results["mse"] = mean_squared_error(y_val, predictions)
+
+            # Threshold checks
+            for metric_name, threshold in self.thresholds.items():
+                if metric_name in results and results[metric_name] > threshold:
                     logger.warning(
-                        f"Metric {metric_name} ({metrics[metric_name]}) exceeded threshold ({threshold})"
+                        f"Metric {metric_name} ({results[metric_name]}) exceeded threshold ({threshold})"
                     )
 
             logger.bind(
                 module="ModelEvaluator",
-                run_id=run_id,
-                metrics=metrics
-            ).info(f"Evaluation complete. Format: {config.report_format}")
-            
-            return metrics
+                metrics=results
+            ).info(f"Evaluation complete. Format: {self.report_format}")
+
+            return results
 
         except Exception as e:
             logger.bind(
                 module="ModelEvaluator",
-                run_id=run_id,
                 error=str(e)
             ).error("Model evaluation failure")
+
             raise ModelTrainingError(
                 "Model evaluation failed",
                 context={
-                    "X_shape": X_test.shape,
-                    "y_shape": y_test.shape,
-                    "model_type": type(model).__name__
-                }
+                    "X_shape": X_val.shape,
+                    "y_shape": y_val.shape,
+                    "model_type": type(model).__name__,
+                },
             ) from e

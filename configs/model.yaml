@@ -21,3 +21,20 @@ training:
   learning_rate: 0.001
   batch_size: 32
   epochs: 100
+
+model_search:
+  strategy: "grid"
+  scoring: "rmse"
+  max_trials: 20
+  models:
+    - name: "rf_small"
+      model_kind: "random_forest_regressor"
+      params:
+        n_estimators: 100
+        max_depth: 10
+
+    - name: "rf_large"
+      model_kind: "random_forest_regressor"
+      params:
+        n_estimators: 500
+        max_depth: 20

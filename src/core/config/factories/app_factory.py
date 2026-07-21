@@ -8,6 +8,7 @@ from .env_factory import build_env_config
 from .data_factory import build_data_config, build_features_config
 from .paths_factory import build_paths_config
 from .model_factory import build_model_config
+from .model_search_factory import build_model_search_config
 from .training_factory import build_training_config
 from .artifacts_factory import build_artifact_config
 from .logging_factory import build_logging_config
@@ -41,6 +42,7 @@ def build_app_config(raw: dict) -> AppConfig:
         paths=build_paths_config(raw["paths"], project_root_path),
         features=build_features_config(raw["features"]),
         model=build_model_config(raw["model"]),
+        model_search=build_model_search_config(raw["model_search"]),
         training=build_training_config(raw["training"]),
         artifacts=build_artifact_config(raw["artifacts"]),
         logging=build_logging_config(raw["logging"]),

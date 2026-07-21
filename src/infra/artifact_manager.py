@@ -124,9 +124,9 @@ class ArtifactManager:
                 context={"model_path": model_path}
             ) from e
 
-    def save_model(self, model: Any, model_name: str) -> Path:
+    def save_model(self, model: Any, model_name: str, run_id: str) -> Path:
         """Serializes the model weights to the filesystem."""
-        save_path = self.models_dir / f"{model_name}.joblib"
+        save_path = self.models_dir / f"{model_name}_{run_id}.joblib"
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:

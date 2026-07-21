@@ -1,45 +1,37 @@
 # src/core/validator.py
+# Validate the schema in the orchestrator, not the service modifying the schema.
+# This is pure Separation of Concerns + Service Contract Enforcement.
+# Run DataValidator after each:
+# IngestionService (raw_schema)
+# DataPreprocessor (preprocessed_schema - drop_columns)
+# FeatureEngineer (engineered_schema - transform, drop non-numeric columns)
+# Do not validate after DataSplitter
 
 from loguru import logger
 import pandas as pd
 import re
 from typing import Dict, List, Union
-from src.core.config.schemas import SchemaItem
-
 
 class DataValidator:
+    # Define common type aliases to make the validator robust
+    # This handles differences between Pandas versions and SQL types
     TYPE_MAPPINGS = {
         "object": ["object", "str"],
         "str": ["object", "str"],
         "float": ["float64", "float32", "float"],
-        "int": ["int64", "int32", "int"],
+        "int": ["int64", "int32", "int"]
     }
-
-    def __init__(self, expected_schema: Union[List[SchemaItem], List[Dict], Dict]):
+    
+    def __init__(self, expected_schema: Union[Dict[str, str], List[Dict[str, str]]]):
         """
         Supports:
-        - List[SchemaItem] (typed config)
-        - List[Dict] with 'column' / 'column_pattern'
-        - Dict[str, str] legacy
+        - {"column": "name", "type": "dtype"}
+        - {"column_pattern": "regex", "type": "dtype"}
         """
+        self.explicit_columns = {}
+        self.pattern_columns = []
 
-        self.explicit_columns: Dict[str, str] = {}
-        self.pattern_columns: List[Dict[str, str]] = []
-
-        # Case 1: typed SchemaItem list
-        if isinstance(expected_schema, list) and all(
-            isinstance(item, SchemaItem) for item in expected_schema
-        ):
-            for item in expected_schema:
-                if item.column:
-                    self.explicit_columns[item.column] = item.type
-                if item.column_pattern:
-                    self.pattern_columns.append(
-                        {"pattern": item.column_pattern, "type": item.type}
-                    )
-
-        # Case 2: dict-based list
-        elif isinstance(expected_schema, list):
+        if isinstance(expected_schema, list):
             for item in expected_schema:
                 if "column" in item:
                     self.explicit_columns[item["column"]] = item["type"]
@@ -48,20 +40,13 @@ class DataValidator:
                         {"pattern": item["column_pattern"], "type": item["type"]}
                     )
                 else:
-                    raise KeyError(
-                        "Schema entry must contain 'column' or 'column_pattern'."
-                    )
-
-        # Case 3: simple dict
-        elif isinstance(expected_schema, dict):
-            self.explicit_columns = expected_schema
-
+                    raise KeyError("Schema entry must contain 'column' or 'column_pattern'.")
         else:
-            raise TypeError("Unsupported schema format for DataValidator")
+            self.explicit_columns = expected_schema
 
         logger.debug(
             f"Validator initialized.\n"
-            f"Explicit: {self.explicit_columns}\n"
+            f"Explicit: {self.explicit_columns}"
             f"Patterns: {self.pattern_columns}"
         )
 
@@ -69,28 +54,29 @@ class DataValidator:
         logger.info("Starting contract validation...")
 
         # Expand pattern-based columns
-        expanded: Dict[str, str] = {}
+        expanded = {}
         for entry in self.pattern_columns:
             regex = re.compile(entry["pattern"])
             matches = [col for col in df.columns if regex.match(col)]
             for col in matches:
                 expanded[col] = entry["type"]
 
+        # Merge explicit + expanded
         full_schema = {**self.explicit_columns, **expanded}
 
-        # Missing columns
+        # Check missing columns
         missing = set(full_schema.keys()) - set(df.columns)
         if missing:
+            logger.error(f"Missing columns: {missing}")
             raise RuntimeError(f"Contract Validation Failed: Missing columns: {missing}")
 
-        # Dtype validation
+        # Validate dtypes
         for col, expected_type in full_schema.items():
             actual_type = str(df[col].dtype)
 
             valid = False
-            if expected_type in self.TYPE_MAPPINGS:
-                if actual_type in self.TYPE_MAPPINGS[expected_type]:
-                    valid = True
+            if expected_type in self.TYPE_MAPPINGS and actual_type in self.TYPE_MAPPINGS[expected_type]:
+                valid = True
             elif expected_type in actual_type:
                 valid = True
 

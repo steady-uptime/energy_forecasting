@@ -95,6 +95,35 @@ class HPOConfig:
     parameters: Dict[str, Any]
 
 @dataclass(frozen=True)
+class ModelDefinition:
+    # Represents a single model candidate in the search space.
+    name: str
+    model_kind: str
+    params: Dict[str, Any]
+
+@dataclass(frozen=True)
+class CandidateModel:
+    # Represents a trained model candidate produced during search.
+    definition: ModelDefinition
+    metrics: Dict[str, float]
+    artifact_path: Path
+
+@dataclass(frozen=True)
+class ModelSearchConfig:
+    # Configuration for the model search engine.
+    # Defines search strategy, scoring metric, trial limits, and candidate models.
+    strategy: str
+    scoring: str
+    max_trials: int
+    models: List[ModelDefinition]
+
+@dataclass(frozen=True)
+class SearchResults:
+    # Aggregates all candidate models and the selected champion.
+    candidates: List[CandidateModel]
+    champion: CandidateModel
+
+@dataclass(frozen=True)
 class ModelConfig:
     name: str
     model_kind: str
@@ -156,6 +185,7 @@ class AppConfig:
     paths: PathsConfig
     features: FeaturesConfig
     model: ModelConfig
+    model_search: ModelSearchConfig
     training: TrainingConfig
     artifacts: ArtifactsConfig
     logging: LoggingConfig

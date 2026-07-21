@@ -9,7 +9,7 @@ from loguru import logger
 class DataPreprocessor:
     """
     Worker: Handles Data Sanitization.
-    Responsibilities: Cleaning, Encoding, Numeric Conversion, Imputation.
+    Responsibilities: Cleaning, Numeric Conversion, Imputation.
     
     Invariant Compliance:
     - Receives injected PreprocessingConfig dataclass.
@@ -40,34 +40,9 @@ class DataPreprocessor:
         try:
             df = df.copy()
 
-            # -----------------------------
-            # Drop Columns
-            # -----------------------------
-            actual_drops = [col for col in self.rules.drop_columns if col in df.columns]
-            df = df.drop(columns=actual_drops)
-
-            logger.bind(
-                module="DataPreprocessor",
-                run_id=self.run_id,
-                dropped_columns=actual_drops
-            ).debug("Dropped columns")
-
-            # -----------------------------
-            # Timestamp normalization
-            # -----------------------------
-            ts_col = df.columns[0]
-
-            if ts_col != "timestamp":
-                df = df.rename(columns={ts_col: "timestamp"})
-
-            df["timestamp"] = pd.to_datetime(df["timestamp"], errors="raise")
-
-            logger.bind(
-                module="DataPreprocessor",
-                run_id=self.run_id,
-                timestamp_column="timestamp",
-                dtype=str(df["timestamp"].dtype)
-            ).debug("Normalized timestamp column")
+            # Timestamp contract enforcement only
+            if "timestamp" not in df.columns:
+                raise PreprocessingError("Timestamp column missing after ingestion")
 
             # -----------------------------
             # Convert MT_* columns to numeric
@@ -106,18 +81,6 @@ class DataPreprocessor:
                     factor=factor,
                     columns=list(mt_cols)
                 ).debug("Applied frequency conversion")
-
-            # -----------------------------
-            # Encoding
-            # -----------------------------
-            for col, mapping in self.rules.encoding.mappings.items():
-                if col in df.columns:
-                    df[col] = df[col].map(mapping)
-                    logger.bind(
-                        module="DataPreprocessor",
-                        run_id=self.run_id,
-                        column=col
-                    ).debug("Applied encoding")
 
             # -----------------------------
             # Imputation
