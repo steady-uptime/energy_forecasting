@@ -1,56 +1,21 @@
-# **Modular AutoML Energy Forecasting System**
+# **Enterprise-Ready MLOps Framework for Energy Forecasting**
 
 ![Python](https://img.shields.io/badge/python-3.9+-blue)
 ![MLOps](https://img.shields.io/badge/MLOps-Production_Grade-orange)
 ![Architecture](https://img.shields.io/badge/Architecture-Service_Oriented-green)
+![Cloud Ready](https://img.shields.io/badge/Cloud_Ready-Azure_ML-blueviolet)
 
-A fully modular, configuration‑driven MLOps framework for **energy‑consumption forecasting**, built around strict engineering laws that eliminate hidden technical debt and enforce reproducibility, portability, and maintainability.
+A modular, configuration-driven MLOps framework designed to manage the full lifecycle of energy-consumption forecasting. This project treats Machine Learning as a **modular, service-oriented, pipeline-drive, production-grade system**, enforcing strict architectural patterns to eliminate technical debt, ensure 100% reproducibility, and provide "plug-and-play" portability across environments.
 
-This project treats Machine Learning as a **software system**, not a script — using a service‑oriented architecture, dependency injection, validation gates, metadata tracking, and a versioned model registry.
+## **🏗 Architectural Philosophy**
+This system is built on the principle of **Decoupled Engineering**. It separates the *What* (ML Logic) from the *How* (Infrastructure) and the *When* (Orchestration).
 
----
-
-## **🚀 Project Overview**
-
-This system is designed to solve real‑world ML engineering problems:
-
-- brittle pipelines  
-- hidden coupling  
-- silent data failures  
-- unreproducible training  
-- unversioned models  
-- unclear orchestration  
-
-The solution is a **clean, layered architecture** with:
-
-- deterministic artifact paths  
-- strict data contracts  
-- versioned model registry  
-- pipeline metadata tracking  
-- config snapshotting  
-- modular services  
-- a dedicated training orchestrator  
-
----
-
-## **🎯 Core Engineering Laws**
-
-The entire project adheres to five architectural laws:
-
-1. **Zero Hardcoding**  
-   All paths, hyperparameters, schemas, and settings come from YAML config files.
-
-2. **Config‑Driven Architecture**  
-   A singleton config loader provides a consistent, environment‑aware configuration object.
-
-3. **Portability First**  
-   All paths use `pathlib` and resolve relative to the project root.
-
-4. **Decoupled Logic**  
-   Data engineering, model engineering, and orchestration are isolated into independent services.
-
-5. **Dependency Injection Everywhere**  
-   The orchestrator receives all services explicitly — no hidden state, no global objects.
+### **Core Engineering Laws:**
+1.  **Zero Hardcoding:** 100% configuration-driven. All hyperparameters, paths, and schemas reside in YAML.
+2.  **Dependency Injection (DI):** Services (Ingestion, Modeling, etc.) are injected into Orchestrators, allowing for easy mocking during unit testing and seamless swapping of components.
+3.  **Deterministic Artifact Lineage:** Every trial and pipeline run produces a unique `run_id`, mapping specific configurations to specific model weights and metadata.
+4.  **Contract Validation:** Every module transition is guarded by a schema validator to prevent "silent failures" in the data pipeline.
+5.  **Singleton Configuration:** A centralized, environment-aware configuration loader ensures a single source of truth for the entire application state.
 
 ---
 
@@ -75,84 +40,80 @@ The project is organized into five layers:
 │        Configuration Layer   │  ← YAML configs + singleton loader
 └──────────────────────────────┘
 ```
-### 1. High‑Level System Architecture (Layers)
+### 1. High-Level System Architecture (Layers)
 
-This diagram represents the **System Topology**. It separates the "Core" (ML Logic) from the "Infra" (Utilities) and "Orchestration" (Execution), ensuring that the ML logic is decoupled from the underlying infrastructure.
+This diagram presents the System Topology, showing how the project is structured into five layers: Pipeline, Orchestration, Core ML Logic, Infrastructure, and Configuration. It illustrates the full execution path—from ingestion and preprocessing through feature engineering, AutoML, evaluation, and model registration—while also showing how production inference, monitoring, and retraining feed back into the training pipeline. Infrastructure components such as the data repository, artifact manager, and structured logging support each service, resulting in a fully decoupled, service‑oriented architecture where ML logic remains isolated from orchestration and infrastructure.
 
-![System Topology](./assets/diagrams/architecture.png)
+![System Topology](./assets/diagrams/SystemArchitecture.png)
 
 <details>
 <summary>View Architecture Logic (Mermaid Code)</summary>
 
 ```text
-
 graph TD
 
     subgraph UI["User Interface / Entry Points"]
-        CLI[CLI Tools]
-        API[FastAPI Inference]
+        CLI["CLI Tools"]
+        API["FastAPI Inference (Planned)"]
     end
 
     subgraph ORCH["Orchestration Layer"]
-        TrainPipe[Train Pipeline]
-        RetrainPipe[Retrain Pipeline]
-        MonitorPipe[Monitor Pipeline]
+        TrainPipe["Training Pipeline"]
+        RetrainPipe["Retraining Pipeline"]
+        MonitorPipe["Monitoring Pipeline"]
     end
 
     subgraph CORE["Core ML Logic"]
-        Ingestion[Ingestion Service]
-        Preprocessing[Preprocessing Service]
-        Features[Feature Engineering]
-        Search[Model Search / AutoML]
-        Eval[Evaluation Service]
-        Registry[Model Registry]
+        Ingestion["Ingestion Service"]
+        Preprocessing["Preprocessing Service"]
+        Features["Feature Engineering"]
+        AutoML["AutoML Search (HPO Service)"]
+        Eval["Evaluation Service"]
+        Registry["Model Registry"]
     end
 
     subgraph INFRA["Infrastructure Layer"]
-        Storage[Model Store & Data Repo]
-        Tracker[Experiment Tracker]
-        Logger[Structured Logger]
-        Secrets[Secrets Management]
+        Repo["Data Repository"]
+        Artifacts["Artifact Manager"]
+        Logger["Structured Logger"]
+        Secrets["Secrets Management (Planned)"]
     end
 
     subgraph CONFIG["Configuration Layer"]
-        Config[YAML Configs]
+        Config["YAML Configs + Singleton Loader"]
     end
 
-    Config -.-> TrainPipe
-    Config -.-> Registry
-    
+    %% Config wiring
+    Config --> TrainPipe
+    Config --> Registry
+
+    %% Pipeline flow
     TrainPipe --> Ingestion
     Ingestion --> Preprocessing
     Preprocessing --> Features
-    Features --> Search
-    Search --> Eval
+    Features --> AutoML
+    AutoML --> Eval
     Eval --> Registry
-    
+
+    %% Production flow
     Registry --> API
-    API --> Prediction[Prediction]
+    API --> Prediction["Prediction"]
     Prediction --> MonitorPipe
-    MonitorPipe -- "Drift Detected" --> RetrainPipe
+    MonitorPipe --> RetrainPipe
     RetrainPipe --> TrainPipe
 
-    Ingestion --- Storage
-    Preprocessing --- Storage
-    Features --- Storage
-    Search --- Storage
-    Eval --- Storage
-    Registry --- Storage
-
-    Ingestion --- Tracker
-    Preprocessing --- Tracker
-    Features --- Tracker
-    Search --- Tracker
-    Eval --- Tracker
-    Registry --- Tracker
+    %% Infra connections
+    Ingestion --- Repo
+    Preprocessing --- Repo
+    Features --- Repo
+    AutoML --- Repo
+    Eval --- Repo
+    Registry --- Repo
 
     Ingestion --- Logger
     Preprocessing --- Logger
     Features --- Logger
-    Search --- Logger
+    AutoML --- Logger
     Eval --- Logger
     Registry --- Logger
 ```
@@ -161,54 +122,80 @@ graph TD
 
 ---
 
-### 2. The Training Pipeline (Data Flow)
+### 2. AutoML / Model Search Pipeline (Trial-Level Lineage)**
 
-This diagram illustrates the **Worker Pattern** and **Data Flow**. It highlights the "Fail-Fast" principle via **Validation Gates**, ensuring that data integrity is verified at every transition point between Data Engineering and ML Engineering.
+This pipeline transforms raw energy-consumption data into a fully evaluated, registry-ready model. It moves through four stages:
 
-![System Topology](./assets/diagrams/ml-data-flow.png)
+Data Engineering — Raw data is loaded, validated, sanitized, and preprocessed to enforce strict schema contracts.
+
+Feature Engineering — Deterministic feature generation and a second validation gate ensure clean, time-series-ready feature matrices.
+
+AutoML Trials — The HPO Service runs multiple model trials, each producing its own metrics and artifacts. A unified evaluator selects the best-performing trial.
+
+Registry Promotion — The chosen Champion model is promoted to the Model Registry with full lineage, metadata, and reproducible artifacts.
+
+This diagram represents the complete flow from raw data to Champion model selection, ensuring reproducibility, contract-driven quality, and trial-level governance. 
+
+![System Topology](./assets/diagrams/ModelSearchPipeline.png)
 
 <details>
 <summary>View Training Pipeline (Mermaid Code)</summary>
 
 ```text
+graph TD
 
-flowchart TD
+    %% -------------------------
+    %% Data Engineering
+    %% -------------------------
+    subgraph DE["Data Engineering"]
+        RawData["Raw Data"] --> Loader["Loader"]
+        Loader --> SchemaVal1["Schema Validator"]
+        SchemaVal1 -->|Fail| DataErr["Data Contract Error"]
+        SchemaVal1 -->|Pass| SanitizedData["Sanitized Data"]
+        SanitizedData --> Preprocessor["Preprocessor"]
+        Preprocessor --> ProcessedData["Processed Data"]
+    end
 
-subgraph DE["Data Engineering"]
-    RawData[(Raw Data)] --> Load[Loader]
-    Load --> Val1{Validator}
-    Val1 -- Fail --> Error[RuntimeError]
-    Val1 -- Pass --> Sanitized[Sanitized Data]
-    Sanitized --> Pre[Preprocessor]
-    Pre --> Processed[(Processed Data)]
-end
+    %% -------------------------
+    %% Feature Engineering
+    %% -------------------------
+    subgraph FE["Feature Engineering"]
+        ProcessedData --> FeatureEng["Feature Engineer"]
+        FeatureEng --> FeatureMatrix["Feature Matrix"]
+        FeatureMatrix --> SchemaVal2["Schema Validator"]
+        SchemaVal2 -->|Fail| FeatureErr["Feature Contract Error"]
+        SchemaVal2 -->|Pass| TimeSplit["TimeSeries Split"]
+    end
 
-subgraph FE["Feature Engineering"]
-    Processed --> Feat[Feature Engineer]
-    Feat --> Matrix[Feature Matrix]
-    Matrix --> Val2{Validator}
-    Val2 -- Fail --> Error
-    Val2 -- Pass --> Split[Train/Test Split]
-end
+    %% -------------------------
+    %% Model Engineering / AutoML
+    %% -------------------------
+    subgraph ME["Model Engineering (AutoML Trials)"]
+        TimeSplit --> TrialLoop["Trial Loop (HPO Service)"]
+        TrialLoop --> TrialWorker["Model Worker (per trial)"]
+        TrialWorker --> TrialMetrics["Trial Metrics"]
+        TrialMetrics --> UnifiedEval["Unified Evaluator"]
+        UnifiedEval --> ChampionSelect["Champion Selection"]
+    end
 
-subgraph ME["Model Engineering (AutoML)"]
-    Split --> Search[Search Space Loop]
-    Search --> Train[Model Worker]
-    Train --> Metrics[Metrics Calculation]
-    Metrics --> Eval[Evaluation Logic]
-    Eval --> Champion{Champion Selection}
-end
+    %% -------------------------
+    %% Registry & Persistence
+    %% -------------------------
+    subgraph RP["Registry & Persistence"]
+        ChampionSelect -->|Promote| Registry["Model Registry"]
+        Registry --> ModelStore["Model Store"]
+        Registry --> PipelineMeta["Pipeline Metadata"]
+    end
 
-subgraph RP["Registry & Persistence"]
-    Champion -- "Winner" --> Reg[Register Model]
-    Reg --> Store[(Model Store)]
-    Reg --> Tracker[Experiment Tracker]
-end
+    %% -------------------------
+    %% Styling
+    %% -------------------------
+    style SchemaVal1 fill:#f9c,stroke:#333
+    style SchemaVal2 fill:#f9c,stroke:#333
+    style ChampionSelect fill:#f9c,stroke:#333
+    style DataErr fill:#ff9999
+    style FeatureErr fill:#ff9999
 
-style Val1 fill:#f96,stroke:#333
-style Val2 fill:#f96,stroke:#333
-style Champion fill:#f96,stroke:#333
-style Error fill:#ff9999
 ```
 
 </details>
@@ -217,164 +204,117 @@ style Error fill:#ff9999
 
 ### 3. The Production Feedback Loop (MLOps Cycle)
 
-This diagram demonstrates the **Observability & Automation** lifecycle. It shows how the system behaves in production, where the **Model Registry** acts as the "Single Source of Truth" to trigger automated retraining based on live drift signals.
+This diagram shows how the system operates in production. Live data flows through the Inference API, generating predictions that are continuously monitored for drift. When drift is detected, the system triggers the Retraining Pipeline, which produces a new model and updates the Champion in the Model Registry. This creates a closed‑loop cycle where the production model is automatically refreshed based on real‑world behavior.
 
-![System Topology](./assets/diagrams/feedback-loop.png)
+![System Topology](./assets/diagrams/FeedbackLoop.png)
 
 <details>
 <summary>View Production Feedback Loop (Mermaid Code)</summary>
 
 ```text
-
 graph TD
 
     subgraph PROD["Production Environment"]
-        LiveData[(Live Data)] --> API[Inference API]
-        API --> Prediction[Prediction]
-        Prediction --> Monitor[Monitoring Service]
+        Live["Live Data"] --> API["Inference API"]
+        API --> Pred["Prediction"]
+        Pred --> Monitor["Monitoring Service"]
     end
 
-    subgraph OBS["Observability & Governance"]
-        Monitor --> Drift{Drift / Error?}
-        Drift -- No --> Prediction
-        Drift -- Yes --> Alert[Alert / Trigger]
+    subgraph OBS["Observability"]
+        Monitor --> Drift["Drift Detected?"]
+        Drift -->|No| Pred
+        Drift -->|Yes| Alert["Trigger Retraining"]
     end
 
     subgraph AUTO["Automated Retraining"]
-        Alert --> RetrainPipe[Retrain Pipeline]
-        RetrainPipe --> TrainPipe[Training Pipeline]
-        TrainPipe --> Registry[Model Registry]
-        Registry -- "Update Champion" --> API
+        Alert --> Retrain["Retraining Pipeline"]
+        Retrain --> Train["Training Pipeline"]
+        Train --> Registry["Model Registry"]
+        Registry -->|Update Champion| API
     end
 
-    style Drift fill:#f96,stroke:#333
+    style Drift fill:#f9c,stroke:#333
     style Alert fill:#ff9999
     style Registry fill:#bbf,stroke:#333
 ```
 
 </details>
 
-### **Key Architectural Highlights**
+---
 
-- **Registry as the Source of Truth**  
-  The inference API will load the *champion model* exclusively from the registry.
+## **🛠 Technical Specifications**
 
-- **Validation Gates**  
-  Every pipeline stage enforces a schema contract to prevent silent data corruption.
-
-- **Worker Pattern**  
-  The orchestrator does not train models directly — it delegates to a Model Worker.
-
-- **Deterministic Metadata**  
-  Every pipeline run produces a metadata file containing timestamps, durations, artifact paths, and registry version.
+-   **Language:** Python 3.9+ (Type Hinted)
+-   **ML Framework:** Scikit-Learn, NumPy, Pandas
+-   **Orchestration:** Custom Training Orchestrator (Worker Pattern)
+-   **Logging:** Structured logging via `loguru` (Context-aware `run_id`)
+-   **Configuration:** YAML + Dataclasses (Singleton Loader)
+-   **Data Validation:** Custom Schema Validator
+-   **Architecture:** Cloud-Ready (Azure ML Compatible)
 
 ---
 
-## **🛠 Tech Stack**
+## **📈 Project Milestones & Capabilities**
 
-- **Language:** Python 3.9+  
-- **ML Framework:** Scikit‑Learn  
-- **Orchestration:** Custom Training Orchestrator  
-- **Logging:** Loguru  
-- **Configuration:** YAML + Dataclasses  
-- **Data Handling:** Pandas, NumPy  
-- **API (Planned):** FastAPI  
-- **Deployment (Planned):** Docker  
-
----
-
-## **📈 Project Milestones & Roadmap**
-
-### **✅ Completed: Architectural Foundations**
-
-#### **🏗️ System Architecture & Engineering**
-- [x] **Service-Oriented Architecture:** Decoupled logic into independent, testable modules with strict input/output contracts.
+### **🏗️ System Architecture & Engineering**
+- [x] **Service-Oriented Architecture:** Full decoupling of ML logic into independent, testable modules with strict input/output contracts.
 - [x] **Production-Grade Dependency Injection:** Services are injected into Orchestrators via constructors to ensure loose coupling and high testability.
 - [x] **Singleton Configuration Management:** Centralized configuration with environment variable overrides and global state consistency.
 - [x] **Data Validation Contracts:** Enforced schema verification at every stage (Raw → Sanitized → Engineered) using a centralized validator.
 - [x] **Portability-First Design:** Zero hardcoding; all paths and resources are dynamically resolved via a project-root-aware configuration loader.
 
-#### **🗄️ Data Engineering & Orchestration**
+### **🗄️ Data Engineering & Orchestration**
 - [x] **DataOrchestrator Pattern:** Consolidated ingestion, preprocessing, and feature engineering into a single, atomic data engineering lifecycle.
 - [x] **Idempotent Data Pipelines:** Designed to handle batch processing with immutable read-only data repositories.
 - [x] **TimeSeries-Aware Splitting:** Custom logic for handling temporal dependencies in energy consumption data.
 
-#### **🤖 Model Lifecycle & Governance**
+### **🤖 Model Lifecycle & Governance**
 - [x] **Model Worker Factory:** Abstracted model instantiation to support multi-model experimentation and easy scaling.
-- [x] **Model Registry & Versioning:** Automated tracking of model URIs, performance metrics, and "Champion" model pointers.
+- [x] **Model Registry & Versioning:** Deterministic artifact paths, versioned registry entries, champion pointer, and full trial/pipeline lineage.
 - [x] **Configuration Snapshotting:** Automatic persistence of the exact hyperparameter and configuration state for every production run.
 - [x] **Pipeline Metadata System:** Structured JSON tracking of execution status, phase durations, and artifact paths.
 
-#### **👁️ Observability & Quality Assurance**
+### **👁️ Observability & Quality Assurance**
 - [x] **Structured Logging:** Contextual logging with unique `run_id` tracking across all services.
 - [x] **Drift Detection Pipeline:** Automated monitoring for data and concept drift.
 - [x] **Automated Reporting:** Generation of drift thresholds and performance summaries.
 
-### **🧭 In Progress / Planned**
-
-#### **🚀 Deployment & Scale**
-- [ ] **Inference API (FastAPI):** Production-ready endpoint to serve the Champion model with request logging.
-- [ ] **Containerization (Docker/K8s):** Standardized environment via Dockerfiles and Kubernetes manifests.
-- [ ] **Secrets Management:** Integration with environment-specific secrets for production deployment.
-
-#### **🔄 Lifecycle Automation**
-- [ ] **Automated Retraining:** Triggered by drift detection events to refresh the Champion model.
-- [ ] **Experiment Tracker (Unified View):** A dashboard/UI for consolidated metrics, run history, and artifact links.
-- [ ] **Model Comparison Engine:** Automated head-to-head comparison of candidate models against the current Champion.
-
 ---
 
-## **💻 Getting Started**
-
-### **Prerequisites**
-
-- Python 3.9+  
-- Virtual environment (`venv` recommended)
+## **💻 Execution Guide**
 
 ### **Installation**
-
 ```bash
 git clone https://github.com/steady-uptime/energy_forecasting
 cd energy_forecasting
 pip install -r requirements.txt
 ```
 
-### **Run the Training Pipeline**
-
+### **Running the Pipeline**
+We use the **Module Execution Pattern** to ensure correct `PYTHONPATH` resolution:
 ```bash
 python -m pipelines.train_pipeline
 ```
-
-This will:
-
-- ingest raw data  
-- preprocess  
-- engineer features  
-- split  
-- train  
-- evaluate  
-- register the model  
-- generate metadata  
-- snapshot the config  
+*This triggers the Bootstrap Loader, which initializes the Singleton Config, wires the injected services, and executes the Orchestrator.*
 
 ---
 
 ## **📂 Directory Structure**
-
-```
+```text
 .
 ├── configs/                # YAML configuration files
-├── data/                   # Raw, processed, engineered data
-├── logs/                   # Structured pipeline logs
-├── artifacts/              # Models, metrics, registry, metadata
-├── pipelines/              # Pipeline entrypoints (train, retrain, etc.)
+├── artifacts/             # Versioned models, metrics, and reports
+├── logs/                  # Structured logs with unique run_ids
+├── pipelines/            # Pipeline entrypoints (train, retrain, etc.)
 ├── src/
-│   ├── core/               # Orchestrator, services, registry, metadata
-│   ├── infra/              # Artifact manager, repository, logging
-│   └── utils/              # Helpers
+│   ├── core/             # Orchestrator, services, registry, metadata
+│   ├── infra/           # Artifact manager, repository, logging, secrets
+│   └── utils/           # Helpers (Validators, Path Utilities)
 └── requirements.txt
 ```
 
+---
+*This project was developed as a demonstration of high-level MLOps engineering principles, moving beyond "Notebook ML" into production-grade software systems.*
 ---
 
 ## **⚖️ Legal & Compliance**

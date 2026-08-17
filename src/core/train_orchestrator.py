@@ -1,5 +1,5 @@
 # src/core/train_orchestrator.py
-from typing import Any, Dict, Tuple, Callable
+from typing import Any, Dict, Callable
 from pathlib import Path
 from loguru import logger
 from datetime import datetime, UTC
@@ -16,8 +16,9 @@ from src.core.model_registry import ModelRegistry
 from src.core.data_orchestrator import DataOrchestrator
 from src.core.splitter_service import TimeSeriesSplitter
 from src.core.run_metadata import PipelineRunMetadata, PhaseMetadata
-from src.core.config.schemas import AppConfig, SearchResults
-from src.core.model_search_engine import ModelSearchEngine
+from src.core.config.schemas import AppConfig
+from src.core.hpo_service import HPOService
+
 
 class TrainingOrchestrator:
     """
@@ -26,7 +27,7 @@ class TrainingOrchestrator:
     Phases:
     - Data Orchestration (DataOrchestrator)
     - Splitting (TimeSeriesSplitter)
-    - Model Search / Modeling (ModelSearchEngine + ModelWorkerFactory)
+    - Model Search / Modeling (HPOService + ModelWorkerFactory)
     - Evaluation (ModelEvaluator)
     - Registry (ModelRegistry)
     """
@@ -39,7 +40,7 @@ class TrainingOrchestrator:
         splitter: TimeSeriesSplitter,
         artifact_manager: ArtifactManager,
         model_factory: ModelWorkerFactory,
-        model_search: ModelSearchEngine,
+        model_search: HPOService,
         evaluator: ModelEvaluator,
         registry: ModelRegistry,
         run_id: str,
@@ -76,21 +77,27 @@ class TrainingOrchestrator:
         # 1. Split data
         X_train, y_train, X_val, y_val = self.splitter.split(engineered_data)
 
-        # 2. Run search engine
+        # 2. Run search engine (HPOService)
         search_results = self.model_search.run(
-            X_train, y_train, X_val, y_val, self.run_id
+            X_train=X_train,
+            y_train=y_train,
+            X_val=X_val,
+            y_val=y_val,
         )
 
-        # 3. Extract champion
-        champion = search_results.champion
+        # 3. Extract champion (best_model from HPOService)
+        champion = search_results.best_model
+        model_path = champion.model_path
+        metrics = champion.metrics
 
-        # 4. Persist metrics
+        # 4. Persist champion-level metrics (pipeline-level run_id)
         self.artifact_manager.save_metrics(
             metrics=champion.metrics,
-            model_name=champion.definition.name,
-            model_uri=str(champion.artifact_path),
+            model_name=champion.model_name,
+            model_uri=model_path,
             training_params=self.config.training,
-            hyperparameters=champion.definition.params,
+            hyperparameters=champion.params,
+            run_id=self.run_id,
         )
 
         # 5. Return search results
@@ -145,8 +152,10 @@ class TrainingOrchestrator:
                 engineered_data,
             )
 
-            champion = search_results.champion
-            model_path = champion.artifact_path
+            champion = search_results.best_model
+
+            # champion.model_path now comes from HPOService TrialResult
+            model_path = champion.model_path
             metrics = champion.metrics
 
             # Phase 3: Model Registry
@@ -239,7 +248,7 @@ class TrainingOrchestrator:
             from uuid import UUID
             from pathlib import Path
             from datetime import datetime
-        
+
             if isinstance(obj, Path):
                 return str(obj)
             if isinstance(obj, UUID):

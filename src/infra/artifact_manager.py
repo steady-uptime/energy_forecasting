@@ -9,11 +9,13 @@ from loguru import logger
 from src.core.config.schemas import ArtifactsConfig
 from src.core.exceptions import ArtifactError
 
+
 class ArtifactManager:
     """
     Infrastructure Layer: Handles the 'How' and 'Where' of storage.
     Decoupled from the ML Model logic and the Registry.
     """
+
     def __init__(self, artifact_cfg: ArtifactsConfig, project_root: Path, run_id: str):
         self.artifact_cfg = artifact_cfg
         self.project_root = project_root
@@ -34,6 +36,9 @@ class ArtifactManager:
             project_root=str(self.project_root)
         ).info("ArtifactManager initialized")
 
+    # -----------------------------------------------------
+    # Drift Report Saving
+    # -----------------------------------------------------
     def save_drift_report(
         self,
         drift_detected: bool,
@@ -42,9 +47,6 @@ class ArtifactManager:
         model_version: str,
         run_id: str
     ):
-        """
-        Persist a drift report for monitoring.
-        """
         log = logger.bind(
             module="ArtifactManager",
             run_id=run_id,
@@ -52,17 +54,11 @@ class ArtifactManager:
         )
 
         try:
-            # -----------------------------------------------------
-            # Resolve Path
-            # -----------------------------------------------------
             drift_dir = Path(self.artifact_cfg.reports_path) / "drift"
             drift_dir.mkdir(parents=True, exist_ok=True)
 
             report_path = drift_dir / f"drift_report_{run_id}.json"
 
-            # -----------------------------------------------------
-            # Build Report Structure
-            # -----------------------------------------------------
             report = {
                 "run_id": run_id,
                 "model_version": model_version,
@@ -71,14 +67,10 @@ class ArtifactManager:
                 "live_metrics": live,
             }
 
-            # -----------------------------------------------------
-            # Write Report
-            # -----------------------------------------------------
             with report_path.open("w") as f:
                 json.dump(report, f, indent=2)
 
             log.info(f"Drift report saved: {report_path}")
-
             return report_path
 
         except Exception as e:
@@ -88,10 +80,10 @@ class ArtifactManager:
                 context={"run_id": run_id, "model_version": model_version}
             ) from e
 
+    # -----------------------------------------------------
+    # Model Loading
+    # -----------------------------------------------------
     def load_model(self, model_path: str):
-        """
-        Load a serialized model artifact from disk.
-        """
         try:
             path = Path(model_path)
 
@@ -124,8 +116,10 @@ class ArtifactManager:
                 context={"model_path": model_path}
             ) from e
 
+    # -----------------------------------------------------
+    # Model Saving
+    # -----------------------------------------------------
     def save_model(self, model: Any, model_name: str, run_id: str) -> Path:
-        """Serializes the model weights to the filesystem."""
         save_path = self.models_dir / f"{model_name}_{run_id}.joblib"
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -134,7 +128,7 @@ class ArtifactManager:
 
             logger.bind(
                 module="ArtifactManager",
-                run_id=self.run_id,
+                run_id=run_id,
                 model_name=model_name,
                 save_path=str(save_path)
             ).info("Model artifact saved")
@@ -144,7 +138,7 @@ class ArtifactManager:
         except Exception as e:
             logger.bind(
                 module="ArtifactManager",
-                run_id=self.run_id,
+                run_id=run_id,
                 error=str(e)
             ).error("Model artifact save failure")
 
@@ -153,16 +147,39 @@ class ArtifactManager:
                 context={"model_name": model_name, "save_path": str(save_path)}
             ) from e
 
+    # -----------------------------------------------------
+    # Run ID Generator
+    # -----------------------------------------------------
+    def generate_run_id(self):
+        import uuid
+        return uuid.uuid4().hex
+
+    # -----------------------------------------------------
+    # Model Path Helper
+    # -----------------------------------------------------
+    def model_path(self, model_name: str, run_id: str) -> str:
+        path = self.models_dir / f"{model_name}_{run_id}.joblib"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return str(path)
+
+    # -----------------------------------------------------
+    # Metrics Saving (UPDATED)
+    # -----------------------------------------------------
     def save_metrics(
-        self, 
+        self,
         metrics: Dict[str, float],
         model_name: str,
-        model_uri: Optional[str] = None,
-        hyperparameters: Optional[Dict[str, Any]] = None,
-        training_params: Any = None
+        model_uri: Optional[str],
+        hyperparameters: Optional[Dict[str, Any]],
+        training_params: Any,
+        run_id: str,   # <-- NEW REQUIRED PARAM
     ) -> Path:
-        """Saves evaluation metrics and metadata as a JSON artifact."""
-        save_path = self.metadata_dir / f"{model_name}_metrics.json"
+        """
+        Saves evaluation metrics and metadata as a JSON artifact.
+        Trial-level lineage now supported via run_id.
+        """
+
+        save_path = self.metadata_dir / f"{model_name}_{run_id}_metrics.json"
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
         metadata = {
@@ -173,18 +190,18 @@ class ArtifactManager:
             "training_params": training_params or {},
             "timestamp": datetime.utcnow().isoformat(),
             "project_root": str(self.project_root),
-            "run_id": self.run_id
+            "run_id": run_id,  # <-- trial-level run_id
         }
 
         serializable_metadata = self._make_serializable(metadata)
 
         try:
-            with open(save_path, 'w') as f:
+            with open(save_path, "w") as f:
                 json.dump(serializable_metadata, f, indent=4)
 
             logger.bind(
                 module="ArtifactManager",
-                run_id=self.run_id,
+                run_id=run_id,
                 model_name=model_name,
                 save_path=str(save_path)
             ).info("Metrics artifact saved")
@@ -194,7 +211,7 @@ class ArtifactManager:
         except Exception as e:
             logger.bind(
                 module="ArtifactManager",
-                run_id=self.run_id,
+                run_id=run_id,
                 error=str(e)
             ).error("Metrics artifact save failure")
 
@@ -203,6 +220,9 @@ class ArtifactManager:
                 context={"model_name": model_name, "save_path": str(save_path)}
             ) from e
 
+    # -----------------------------------------------------
+    # Serialization Helper
+    # -----------------------------------------------------
     def _make_serializable(self, data: Any) -> Any:
         if is_dataclass(data) and not isinstance(data, type):
             return asdict(data)

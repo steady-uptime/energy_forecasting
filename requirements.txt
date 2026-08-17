@@ -1,3 +1,4 @@
+# requirements.txt
 # Data Manipulation & Analysis
 pandas==3.0.3
 numpy==2.5.0
@@ -5,6 +6,8 @@ numpy==2.5.0
 # Machine Learning
 scikit-learn==1.9.0
 joblib==1.5.3
+xgboost
+lightgbm
 
 # Configuration & Logging
 pyyaml==6.0.3

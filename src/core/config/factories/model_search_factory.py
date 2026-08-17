@@ -4,20 +4,31 @@ from typing import Dict, Any, List
 
 from src.core.config.schemas import ModelDefinition, ModelSearchConfig
 
+ALLOWED_MODEL_KINDS = {
+    "random_forest_regressor",
+    "random_forest_classifier",
+    "gradient_boosting",
+    "xgboost",
+    "lightgbm",
+    "elastic_net",
+}
 
 def build_model_search_config(raw: Dict[str, Any]) -> ModelSearchConfig:
-    """
-    Factory for constructing ModelSearchConfig from raw YAML dict.
-    Ensures all model definitions are converted into typed ModelDefinition objects.
-    """
-    models = [
-        ModelDefinition(
-            name=m["name"],
-            model_kind=m["model_kind"],
-            params=m["params"],
+    models = []
+
+    for m in raw.get("models", []):
+        kind = m["model_kind"]
+
+        if kind not in ALLOWED_MODEL_KINDS:
+            raise ValueError(f"Unsupported model_kind: {kind}")
+
+        models.append(
+            ModelDefinition(
+                name=m["name"],
+                model_kind=kind,
+                params=m["params"],
+            )
         )
-        for m in raw.get("models", [])
-    ]
 
     return ModelSearchConfig(
         strategy=raw["strategy"],

@@ -3,7 +3,9 @@ import sys
 import uuid
 from pathlib import Path
 
-from src.core.config_loader import config  
+from loguru import logger
+
+from src.core.config_loader import config
 from src.infra.data_repository import DataRepository
 from src.core.ingestion_service import IngestionService
 from src.core.preprocessing_service import DataPreprocessor
@@ -17,10 +19,9 @@ from src.core.train_orchestrator import TrainingOrchestrator
 from src.core.model_registry import ModelRegistry
 from src.core.exceptions import PipelineError
 from src.core.data_orchestrator import DataOrchestrator
-from src.core.model_search_engine import ModelSearchEngine
+from src.core.hpo_service import HPOService
 
 run_id = uuid.uuid4().hex
-from loguru import logger
 setup_logger(config.logging, Path(config.project_root))
 
 
@@ -75,10 +76,8 @@ def main():
         model_factory = ModelWorkerFactory(artifact_manager=artifact_manager)
         evaluator = ModelEvaluator(eval_cfg=config.evaluation)
 
-        model_search = ModelSearchEngine(
-            cfg=config.model_search,
-            model_factory=model_factory,
-            evaluator=evaluator,
+        model_search = HPOService(
+            search_config=config.model_search,
             artifact_manager=artifact_manager,
         )
 
@@ -100,7 +99,7 @@ def main():
     except PipelineError as e:
         logger.bind(run_id=run_id).error(f"Pipeline failure: {e.message}")
         sys.exit(1)
-    except Exception as e:
+    except Exception:
         logger.bind(run_id=run_id).exception("Unexpected System Failure")
         sys.exit(1)
 
